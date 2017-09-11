@@ -1,4 +1,4 @@
-import config, ProductAspectsExtraction
+import config, product_aspects_extraction
 import nltk
 from nltk import sent_tokenize, word_tokenize
 
@@ -48,9 +48,9 @@ reviewSentenceList = sentence_tokenize_of_review(fileContent)
 
 tokenizeReviewWordList = word_tokenize_review(fileContent)
 pos_tagged_list=pos_tagging(tokenizeReviewWordList)
-noun_list= ProductAspectsExtraction.noun_chunking(pos_tagged_list)
+noun_list= product_aspects_extraction.noun_chunking(pos_tagged_list)
 print(noun_list)
 print(len(noun_list))
-aspect_list_after_stopwords = ProductAspectsExtraction.filter_stopword(noun_list)
+aspect_list_after_stopwords = product_aspects_extraction.filter_stopword(noun_list)
 print(len(aspect_list_after_stopwords))
 #print(noun_list)
