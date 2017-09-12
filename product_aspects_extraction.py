@@ -42,7 +42,6 @@ def noun_chunking(pos_tagged_text):
     #chunked.draw()
     #print(chunked)
     for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
-        #noun_list_after_chunk.append(" ".join([a for (a,b) in subtree.leaves()]))
         noun_list_after_chunk.append(" ".join(word for word, pos in subtree.leaves()).lower())
 
     for aspect in noun_list_after_chunk:

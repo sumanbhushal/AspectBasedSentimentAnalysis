@@ -1,4 +1,4 @@
-import config, product_aspects_extraction
+import config, product_aspects_extraction, pre_processing
 import nltk
 from nltk import sent_tokenize, word_tokenize
 
@@ -12,45 +12,13 @@ def read_file():
     return file
 
 
-def sentence_tokenize_of_review(file):
-    """
-    :param file:
-    :return: file after sentence tokenize
-    """
-    return sent_tokenize(file)
+def main():
+    review_list = read_file()
+    word_tokenize_review_list = pre_processing.word_tokenize_review(review_list)
+    pos_tagged_review_list = pre_processing.pos_tagging(word_tokenize_review_list)
+    noun_list = product_aspects_extraction.noun_chunking(pos_tagged_review_list)
+    noun_list_without_stopwords = product_aspects_extraction.filter_stopword(noun_list)
+    print(noun_list_without_stopwords)
 
-
-def word_tokenize_review(sentence_list):
-    """
-    :param sentence_list:
-    :return: list of word tokenize
-    """
-    # word_tokenize_list=[]
-    # for word in sentence_list:
-    #     word_tokenize_list.append(word_tokenize(word))
-    # return word_tokenize_list
-    return word_tokenize(sentence_list)
-
-
-#POS tagging
-def pos_tagging(consumer_review):
-    """
-
-    :param consumer_review: word tokenize consumer review
-    :return: List of word with POS tagging
-    """
-    pos_tagged = nltk.pos_tag(consumer_review)
-    return pos_tagged
-
-
-fileContent = read_file()
-reviewSentenceList = sentence_tokenize_of_review(fileContent)
-
-tokenizeReviewWordList = word_tokenize_review(fileContent)
-pos_tagged_list=pos_tagging(tokenizeReviewWordList)
-noun_list= product_aspects_extraction.noun_chunking(pos_tagged_list)
-print(noun_list)
-print(len(noun_list))
-aspect_list_after_stopwords = product_aspects_extraction.filter_stopword(noun_list)
-print(len(aspect_list_after_stopwords))
-#print(noun_list)
+if __name__ == '__main__':
+    main()
