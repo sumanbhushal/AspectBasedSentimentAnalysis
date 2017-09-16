@@ -1,5 +1,6 @@
 from nltk import word_tokenize, sent_tokenize, pos_tag
 from nltk.corpus import stopwords
+import re
 
 
 # Sentence Tokenization
@@ -11,23 +12,69 @@ def sentence_tokenize_of_review(file):
     return sent_tokenize(file)
 
 
+def review_cleanup_labeled_data(sentences):
+    """
+    Cleaning up the review (removing explicitly mentioned product aspect and their sentiment score
+    :param sentences:
+    :return: cleaned manually labeled data
+    """
+    # Removing explict product aspect formed with three words and a hyperlink and sentiment score
+    rg_exp_for_3plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    review_filtered = re.sub(rg_exp_for_3plus, '', sentences)
+
+    # Removing explicit product aspect formed with two words and a hyperlink and sentiment score
+    rg_exp_for_2plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    review_filtered_hyperlink = re.sub(rg_exp_for_2plus, '', review_filtered)
+
+    # Removing explict product aspect with alphanumeric characters and sentiment score
+    rg_exp_alphanumeric = re.compile('((?:[a-z][a-z]*[0-9]+[a-z0-9]*))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review = re.findall(rg, sentence_list)
+    review_filtered_alphanumeric = re.sub(rg_exp_alphanumeric, '', review_filtered_hyperlink)
+
+    # Removing explict product aspect with two words separated with space and sentiment score
+    rg_exp_two_words_aspects = re.compile('(\\w+)(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review = re.findall(rg, sentence_list)
+    review_filtered_two_words_aspects = re.sub(rg_exp_two_words_aspects, '', review_filtered_alphanumeric)
+
+    # Removing explict product aspect with single words and sentiment score
+    rg_exp_single_words_aspects = re.compile('(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    review_filtered_single_words_aspects = re.sub(rg_exp_single_words_aspects, '', review_filtered_two_words_aspects)
+
+    return review_filtered_single_words_aspects
+
+
+def review_cleanup_symbols(sentences):
+    # Removing [#,{, }] symbols
+    reg_exp_multi_symbol = re.compile('[#\\{\\}]', re.IGNORECASE | re.DOTALL)
+    review_filtered_multi_symbol = re.sub(reg_exp_multi_symbol, '', sentences)
+
+    # Removing =) symbols
+    reg_exp_symbol1 = re.compile('.*?(=\\))', re.IGNORECASE | re.DOTALL)
+    review_filtered_symbol1 = re.sub(reg_exp_symbol1, '', review_filtered_multi_symbol)
+
+    # Removing ... symbols
+    reg_exp_symbol2 = re.compile('.*?(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
+    final_filtered_review = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
+
+    return final_filtered_review
+
 # Word Tokenization
 def word_tokenize_review(sentence_list):
     """
     :param sentence_list:
     :return: list of word tokenize
     """
-    return word_tokenize(sentence_list)
+    return [word_tokenize(sentences) for sentences in sentence_list]
 
 
 # POS tagging
-def pos_tagging(consumer_review):
+def pos_tagging(tokeninzed_sentence_list):
     """
 
-    :param consumer_review: word tokenize consumer review
+    :param tokeninzed_sentence_list: word tokenize consumer review
     :return: List of word with POS tagging
     """
-    pos_tagged = pos_tag(consumer_review)
+    pos_tagged = [pos_tag(sentences) for sentences in tokeninzed_sentence_list]
     return pos_tagged
 
 
@@ -44,3 +91,4 @@ def filter_stopwords(product_aspect_list):
         if words[0] not in stop_words:
             aspect_list_without_stopwords.append(words)
     return aspect_list_without_stopwords
+

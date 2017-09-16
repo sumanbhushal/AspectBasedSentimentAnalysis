@@ -11,7 +11,7 @@ raw_consumerReviews = "I bought an iPhone a few days ago. It is such a nice phon
 
 # word tokenization
 cosReview_word_tokens = word_tokenize(raw_consumerReviews)
-print(cosReview_word_tokens)
+# print(cosReview_word_tokens)
 
 
 #stopwords - using English
@@ -48,7 +48,7 @@ def noun_chunking(pos_tagged_text):
         if (aspect_dictionary.keys()!= aspect):
             aspect_dictionary[aspect] = noun_list_after_chunk.count(aspect)
     outputAspect = sorted(aspect_dictionary.items(), key=lambda x: x[1], reverse=True)
-    print(outputAspect)
+    # print(outputAspect)
     return outputAspect
 
 #Extraction Noun from sentence
@@ -71,15 +71,14 @@ def extract_feature(noun_list):
 # all_words = nltk.FreqDist(pos_tagging(text_after_stopwords))
 # print(all_words.most_common(5))
 
-all_word = pos_tagging(cosReview_word_tokens)
-print(all_word)
-extract_noun_set = noun_chunking(all_word)
-print(extract_noun_set)
-# noun_set = extract_noun(extract_noun_set)
 
-print(extract_feature(extract_noun_set))
-
-
+if __name__ == '__main__':
+    all_word = pos_tagging(cosReview_word_tokens)
+    print(all_word)
+    extract_noun_set = noun_chunking(all_word)
+    print(extract_noun_set)
+    # noun_set = extract_noun(extract_noun_set)
+    print(extract_feature(extract_noun_set))
 
 
 

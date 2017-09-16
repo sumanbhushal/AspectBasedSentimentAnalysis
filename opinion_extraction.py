@@ -10,7 +10,7 @@ def generate_ngrams(input_text, n):
     #print(ngram_list)
     return ngram_list
 
-generate_ngrams("this is test test test text.", 2)
+generate_ngrams("this is test test test text.", 3)
 
 #wordnet to get the syns set and use sentiwordnet to find the orientation of the word
 def word_orientation(inputWord):
@@ -21,3 +21,5 @@ def word_orientation(inputWord):
         print(word_orientation)
         print(word_orientation.pos_score())
     print(syns[0])
+
+word_orientation('good')
