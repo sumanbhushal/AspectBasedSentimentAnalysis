@@ -28,12 +28,11 @@ def review_cleanup_labeled_data(sentences):
 
     # Removing explict product aspect with alphanumeric characters and sentiment score
     rg_exp_alphanumeric = re.compile('((?:[a-z][a-z]*[0-9]+[a-z0-9]*))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review = re.findall(rg, sentence_list)
+    # review = re.findall(rg_exp_alphanumeric, sentence_list)
     review_filtered_alphanumeric = re.sub(rg_exp_alphanumeric, '', review_filtered_hyperlink)
 
     # Removing explict product aspect with two words separated with space and sentiment score
     rg_exp_two_words_aspects = re.compile('(\\w+)(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review = re.findall(rg, sentence_list)
     review_filtered_two_words_aspects = re.sub(rg_exp_two_words_aspects, '', review_filtered_alphanumeric)
 
     # Removing explict product aspect with single words and sentiment score
@@ -49,12 +48,18 @@ def review_cleanup_symbols(sentences):
     review_filtered_multi_symbol = re.sub(reg_exp_multi_symbol, '', sentences)
 
     # Removing =) symbols
-    reg_exp_symbol1 = re.compile('.*?(=\\))', re.IGNORECASE | re.DOTALL)
+    reg_exp_symbol1 = re.compile('(=\\))', re.IGNORECASE | re.DOTALL)
     review_filtered_symbol1 = re.sub(reg_exp_symbol1, '', review_filtered_multi_symbol)
 
     # Removing ... symbols
-    reg_exp_symbol2 = re.compile('.*?(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
+    reg_exp_symbol2 = re.compile('(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
     final_filtered_review = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
+
+    # Removing , symbols at the starting of line
+    # reg_exp_symbol3 = re.compile('[^,]', re.IGNORECASE | re.DOTALL)
+    # reg_exp_symbol3 = re.compile('(,)((?:[a-z][a-z]+))', re.IGNORECASE | re.DOTALL)
+    # review = re.findall(reg_exp_symbol3, final_filtered_review)
+     #print(review)
 
     return final_filtered_review
 
@@ -84,7 +89,6 @@ def filter_stopwords(product_aspect_list):
     :param product_aspect_list:
     :return: product aspect list after filtering stopwords
     """
-
     stop_words = set(stopwords.words('english'))
     aspect_list_without_stopwords = []
     for words in product_aspect_list:

@@ -3,4 +3,5 @@ currentWorkingDirectory = os.getcwd()
 #print(currentWorkingDirectory)
 
 Datasets_path = currentWorkingDirectory+"\Datasets\\"
-#print(Datasets_path)
+Output_file_path = currentWorkingDirectory+"\Files\\"
+#print(Output_file_path)
