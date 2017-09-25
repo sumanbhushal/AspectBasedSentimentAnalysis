@@ -1,5 +1,6 @@
 from nltk import word_tokenize, sent_tokenize, pos_tag
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import WordNetLemmatizer
 import re
 
 
@@ -96,3 +97,58 @@ def filter_stopwords(product_aspect_list):
             aspect_list_without_stopwords.append(words)
     return aspect_list_without_stopwords
 
+
+def lemmatization(product_aspect_list):
+    """
+    Normalizing words as many variations of words carry same meaning
+    :param product_aspect_list:
+    :return: combination of product aspect that has the same meaning
+    """
+    product_aspect_dictionary={}
+    lemmatizer = WordNetLemmatizer()
+    for lemma in product_aspect_list:
+        # count=lemma[1]
+        lemma_word = lemmatizer.lemmatize(lemma[0])
+        if lemma_word in product_aspect_dictionary:
+            for key, value in product_aspect_dictionary.items():
+                product_aspect_dictionary[key] = value + lemma[1]
+        else:
+            product_aspect_dictionary[lemma_word] = lemma[1]
+
+    product_aspect = sorted(product_aspect_dictionary.items(), key=lambda x: x[1], reverse=True)
+    return product_aspect
+
+
+def get_synonym_sets(noun_list):
+
+    product_aspects_dictionary = {}
+    for noun, count in noun_list:
+        synonyms = []
+        in_list = []
+        not_in_list=[]
+        for syn in wordnet.synsets(noun):
+            for lemma in syn.lemmas():
+                synonyms.append(lemma.name())
+        print(synonyms)
+        for nn in noun_list:
+            for ss in synonyms:
+                print(ss)
+                if nn in synonyms:
+                    in_list.append(nn)
+                else:
+                    not_in_list.append(nn)
+    print(in_list)
+    print(not_in_list)
+
+
+    #comparing words
+    first_word = wordnet.synset('image.n.01')
+
+    second_word = wordnet.synset('picture.n.01')
+    print(first_word.wup_similarity(second_word))
+    #print(synonyms)
+
+    hyponyms_list = []
+    for syn in wordnet.synsets("phone"):
+        hyponyms_list.append(list(syn.closure(lambda h: h.hyponyms())))
+    #print(hyponyms_list)

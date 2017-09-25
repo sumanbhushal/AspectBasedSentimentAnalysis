@@ -2,24 +2,36 @@ import nltk
 from nltk.corpus import wordnet
 from nltk.corpus import sentiwordnet
 
-def generate_ngrams(input_text, n):
-    ngram_list = []
-    input = input_text.split(' ')
-    for i in range(len(input) - n+1):
-        ngram_list.append(input[i:i+n])
-    #print(ngram_list)
-    return ngram_list
 
-generate_ngrams("this is test test test text.", 3)
+def extract_opinion(pos_tagged_sentence_list):
+    adjective_list = []
+    chunkRegExpress = r"""Opinion: {<JJ.*>+}"""
+    chunkParsar = nltk.RegexpParser(chunkRegExpress)
+    for pos_tagged_content in pos_tagged_sentence_list:
+        chunked = chunkParsar.parse(pos_tagged_content)
+        # chunked.draw()
+        # print(chunked)
+        for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'Opinion'):
+            adjective_list.append(" ".join(word for word, pos in subtree.leaves()).lower())
+    print(len(adjective_list),adjective_list)
 
-#wordnet to get the syns set and use sentiwordnet to find the orientation of the word
+
+def opinion_from_tagged_sents(pos_tagged_sentences):
+    opinion_list=[]
+    for pos_taged_sents in pos_tagged_sentences:
+        for word, pos in pos_taged_sents:
+            if pos =='JJ' or pos =='JJR' or pos == 'JJS':
+                opinion_list.append(word)
+    print(len(opinion_list),opinion_list)
+
+# WordNet to get the syns set and use SentiWordNet to find the orientation of the word
 def word_orientation(inputWord):
     syns = wordnet.synsets(inputWord)
     if (len(syns) != 0):
         word = syns[0].name()
         word_orientation = sentiwordnet.senti_synset(word)
-        print(word_orientation)
-        print(word_orientation.pos_score())
-    print(syns[0])
+        #print(word_orientation)
+        #print(word_orientation.pos_score())
+    #print(syns[0])
 
 word_orientation('good')

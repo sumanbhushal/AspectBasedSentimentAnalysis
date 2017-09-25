@@ -1,4 +1,4 @@
-import config, product_aspects_extraction, pre_processing
+import config, product_aspects_extraction, pre_processing, evaluation_matrix, opinion_extraction
 import nltk
 from nltk import sent_tokenize, word_tokenize
 
@@ -8,7 +8,7 @@ def read_file():
     Read file with review contents
     :return: content of file
     """
-    file = open(config.Datasets_path + "Canon PowerShot SD500.txt", "r").read()
+    file = open(config.Datasets_path + "norton.txt", "r").read()
     return file
 
 
@@ -57,8 +57,19 @@ def main():
     word_tokenize_review_list = pre_processing.word_tokenize_review(sentence_list)
     pos_tagged_review_list = pre_processing.pos_tagging(word_tokenize_review_list)
     noun_list = product_aspects_extraction.noun_chunking(pos_tagged_review_list)
-    #noun_list_without_stopwords = product_aspects_extraction.filter_stopword(noun_list)
-    #print(noun_list)
+    noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list)
+    lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
+    pre_processing.get_synonym_sets(lemmatized)
+
+    # op_list = opinion_extraction.extract_opinion(pos_tagged_review_list)
+    # opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
+
+    # precision = evaluation_matrix.precision(len(lemmatized), 179)
+    # print(len(lemmatized),lemmatized)
+    # pre_processing.get_synonym_sets()
+    # print(len(noun_list_without_stopwords),noun_list_without_stopwords)
+    # calculate_relative_frequency_tags(pos_tagged_review_list)
+
 
 
 if __name__ == '__main__':
