@@ -1,6 +1,5 @@
-import config, product_aspects_extraction, pre_processing, evaluation_matrix, opinion_extraction
+import config, product_aspects_extraction, pre_processing, opinion_extraction
 import nltk
-from nltk import sent_tokenize, word_tokenize
 
 
 def read_file():
@@ -8,7 +7,7 @@ def read_file():
     Read file with review contents
     :return: content of file
     """
-    file = open(config.Datasets_path + "norton.txt", "r").read()
+    file = open(config.Datasets_path + "Canon S100.txt", "r").read()
     return file
 
 
@@ -59,10 +58,10 @@ def main():
     noun_list = product_aspects_extraction.noun_chunking(pos_tagged_review_list)
     noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list)
     lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
-    pre_processing.get_synonym_sets(lemmatized)
+    # pre_processing.get_synonyms_set(lemmatized)
 
     # op_list = opinion_extraction.extract_opinion(pos_tagged_review_list)
-    # opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
+    opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
 
     # precision = evaluation_matrix.precision(len(lemmatized), 179)
     # print(len(lemmatized),lemmatized)

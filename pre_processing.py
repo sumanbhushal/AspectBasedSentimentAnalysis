@@ -1,17 +1,7 @@
+import re
 from nltk import word_tokenize, sent_tokenize, pos_tag
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
-import re
-
-
-# Sentence Tokenization
-def sentence_tokenize_of_review(file):
-    """
-    :param file:
-    :return: file after sentence tokenize
-    """
-    return sent_tokenize(file)
-
 
 def review_cleanup_labeled_data(sentences):
     """
@@ -63,6 +53,15 @@ def review_cleanup_symbols(sentences):
      #print(review)
 
     return final_filtered_review
+
+
+# Sentence Tokenization
+def sentence_tokenize_of_review(file):
+    """
+    :param file:
+    :return: file after sentence tokenize
+    """
+    return sent_tokenize(file)
 
 # Word Tokenization
 def word_tokenize_review(sentence_list):
@@ -119,36 +118,34 @@ def lemmatization(product_aspect_list):
     return product_aspect
 
 
-def get_synonym_sets(noun_list):
-
+def get_synonyms_set(noun_list):
+    print(noun_list)
     product_aspects_dictionary = {}
+    in_list = []
+    not_in_list = []
     for noun, count in noun_list:
         synonyms = []
-        in_list = []
-        not_in_list=[]
         for syn in wordnet.synsets(noun):
             for lemma in syn.lemmas():
                 synonyms.append(lemma.name())
-        print(synonyms)
-        for nn in noun_list:
-            for ss in synonyms:
-                print(ss)
-                if nn in synonyms:
-                    in_list.append(nn)
+
+        for nn, cc in noun_list:
+            if nn in synonyms:
+                if noun in product_aspects_dictionary:
+                    pass
                 else:
-                    not_in_list.append(nn)
-    print(in_list)
-    print(not_in_list)
+                    product_aspects_dictionary[noun] = noun
+            else:
+                not_in_list.append(nn)
+            # for ss in synonyms:
+            #     if nn == ss:
+            #         in_list.append(ss)
+            #     else:
+            #         not_in_list.append(ss)
 
-
-    #comparing words
-    first_word = wordnet.synset('image.n.01')
-
-    second_word = wordnet.synset('picture.n.01')
-    print(first_word.wup_similarity(second_word))
-    #print(synonyms)
-
-    hyponyms_list = []
-    for syn in wordnet.synsets("phone"):
-        hyponyms_list.append(list(syn.closure(lambda h: h.hyponyms())))
-    #print(hyponyms_list)
+    synonyms = []
+    for syn in wordnet.synsets('time'):
+        for lemma in syn.lemmas():
+            synonyms.append(lemma.name())
+    print(synonyms)
+    #print("not in list", not_in_list)

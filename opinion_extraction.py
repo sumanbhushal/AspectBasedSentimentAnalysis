@@ -13,16 +13,8 @@ def extract_opinion(pos_tagged_sentence_list):
         # print(chunked)
         for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'Opinion'):
             adjective_list.append(" ".join(word for word, pos in subtree.leaves()).lower())
-    print(len(adjective_list),adjective_list)
+    #print(len(adjective_list),adjective_list)
 
-
-def opinion_from_tagged_sents(pos_tagged_sentences):
-    opinion_list=[]
-    for pos_taged_sents in pos_tagged_sentences:
-        for word, pos in pos_taged_sents:
-            if pos =='JJ' or pos =='JJR' or pos == 'JJS':
-                opinion_list.append(word)
-    print(len(opinion_list),opinion_list)
 
 # WordNet to get the syns set and use SentiWordNet to find the orientation of the word
 def word_orientation(inputWord):
@@ -34,4 +26,3 @@ def word_orientation(inputWord):
         #print(word_orientation.pos_score())
     #print(syns[0])
 
-word_orientation('good')
