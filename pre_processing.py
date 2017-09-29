@@ -3,6 +3,7 @@ from nltk import word_tokenize, sent_tokenize, pos_tag
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 
+
 def review_cleanup_labeled_data(sentences):
     """
     Cleaning up the review (removing explicitly mentioned product aspect and their sentiment score
@@ -63,6 +64,7 @@ def sentence_tokenize_of_review(file):
     """
     return sent_tokenize(file)
 
+
 # Word Tokenization
 def word_tokenize_review(sentence_list):
     """
@@ -103,7 +105,7 @@ def lemmatization(product_aspect_list):
     :param product_aspect_list:
     :return: combination of product aspect that has the same meaning
     """
-    product_aspect_dictionary={}
+    product_aspect_dictionary = {}
     lemmatizer = WordNetLemmatizer()
     for lemma in product_aspect_list:
         # count=lemma[1]
@@ -121,31 +123,26 @@ def lemmatization(product_aspect_list):
 def get_synonyms_set(noun_list):
     print(noun_list)
     product_aspects_dictionary = {}
-    in_list = []
-    not_in_list = []
     for noun, count in noun_list:
         synonyms = []
         for syn in wordnet.synsets(noun):
             for lemma in syn.lemmas():
                 synonyms.append(lemma.name())
+        # print(synonyms)
+        if synonyms:
+            for nn, cc in noun_list:
+                if nn in synonyms:
+                    noun_count_pair = (nn, cc)
+                    replace_value = (noun, cc)
+                    noun_list[noun_list.index(noun_count_pair)] = replace_value
 
-        for nn, cc in noun_list:
-            if nn in synonyms:
-                if noun in product_aspects_dictionary:
-                    pass
-                else:
-                    product_aspects_dictionary[noun] = noun
-            else:
-                not_in_list.append(nn)
-            # for ss in synonyms:
-            #     if nn == ss:
-            #         in_list.append(ss)
-            #     else:
-            #         not_in_list.append(ss)
+    print(len(noun_list), noun_list)
+    for noun, count in noun_list:
+        if noun in product_aspects_dictionary:
+            product_aspects_dictionary[noun] = (product_aspects_dictionary[noun]) + count
+        else:
+            product_aspects_dictionary[noun] = count
 
-    synonyms = []
-    for syn in wordnet.synsets('time'):
-        for lemma in syn.lemmas():
-            synonyms.append(lemma.name())
-    print(synonyms)
-    #print("not in list", not_in_list)
+    product_aspect = sorted(product_aspects_dictionary.items(), key=lambda x: x[1], reverse=True)
+    # print(len(product_aspect),product_aspect)
+    return product_aspect

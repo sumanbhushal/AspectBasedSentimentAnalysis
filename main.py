@@ -1,4 +1,4 @@
-import config, product_aspects_extraction, pre_processing, opinion_extraction
+import config, product_aspects_extraction, pre_processing, opinion_extraction, msc
 import nltk
 
 
@@ -7,7 +7,7 @@ def read_file():
     Read file with review contents
     :return: content of file
     """
-    file = open(config.Datasets_path + "Canon S100.txt", "r").read()
+    file = open(config.Datasets_path + "Canon PowerShot SD500.txt", "r").read()
     return file
 
 
@@ -24,27 +24,23 @@ def calculate_relative_frequency_tags(pos_tagged_review_list):
     :return:
     """
     tags_relative_frequency = []
-    pos_tags = ['NN', 'JJ', 'VB' 'DT', '.']
-    # review_to_dict=dict(pos_tagged_review_list)
-    word_length = ''
+    tags_relative_frequency_dictionary = {}
+    pos_tags = ['NN', 'JJ', 'VB', 'DT', '.', 'VBP']
     print(pos_tagged_review_list)
     for tags in pos_tags:
-        for word in pos_tagged_review_list:
-            if word[1] in tags:
-                print("Current Tag: ", tags, "Prev Tag: ",
-                      pos_tagged_review_list[pos_tagged_review_list.index(word) - 1][1])
+        for word_pos in pos_tagged_review_list:
+            for word, pos in word_pos:
+                if pos in pos_tags:
+                    word_pos_position = (word, pos)
+                    prev_pos_current_pos = ( word_pos[word_pos.index(word_pos_position) - 1][1], pos)
+                    tags_relative_frequency.append(prev_pos_current_pos)
 
-                #
-                # for word in review_to_dict:
-                #     for key, value in word.items():
-                #         for i in range(1, len(word)):
-                #             print(value[i], value[i - 1])
+    for current_prev_tag in tags_relative_frequency:
+        if (tags_relative_frequency_dictionary.keys()!= current_prev_tag):
+            tags_relative_frequency_dictionary[current_prev_tag] = tags_relative_frequency.count(current_prev_tag)
 
-
-                # if word[1] == 'NN':
-                #     print(zip((word[1:], word)))
-                #     tags_relative_frequency.append(word[0])
-    print(tags_relative_frequency)
+        combine_tag_frequency = sorted(tags_relative_frequency_dictionary.items(), key=lambda x: x[1], reverse=True)
+    print(len(combine_tag_frequency), combine_tag_frequency)
 
 
 def main():
@@ -58,18 +54,21 @@ def main():
     noun_list = product_aspects_extraction.noun_chunking(pos_tagged_review_list)
     noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list)
     lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
-    # pre_processing.get_synonyms_set(lemmatized)
+    #pre_processing.get_synonyms_set(lemmatized)
 
     # op_list = opinion_extraction.extract_opinion(pos_tagged_review_list)
-    opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
+    # opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
 
     # precision = evaluation_matrix.precision(len(lemmatized), 179)
     # print(len(lemmatized),lemmatized)
     # pre_processing.get_synonym_sets()
     # print(len(noun_list_without_stopwords),noun_list_without_stopwords)
-    # calculate_relative_frequency_tags(pos_tagged_review_list)
+    calculate_relative_frequency_tags(pos_tagged_review_list)
 
-
+    # manual_labeled_product_aspect = msc.extract_manual_labeled_aspect(review_list)
+    # for aspect, count in manual_labeled_product_aspect:
+    #     # print(aspect)
+    #     write_to_file('product_aspects.txt', aspect + '\n')
 
 if __name__ == '__main__':
     main()
