@@ -7,7 +7,7 @@ def read_file():
     Read file with review contents
     :return: content of file
     """
-    file = open(config.Datasets_path + "Canon PowerShot SD500.txt", "r").read()
+    file = open(config.Datasets_path + "Hitachi router.txt", "r").read()
     return file
 
 
@@ -45,6 +45,7 @@ def calculate_relative_frequency_tags(pos_tagged_review_list):
 
 def main():
     review_list = read_file()
+    # pre_processing.extract_each_review(review_list)
     review_filter_labeled_data = pre_processing.review_cleanup_labeled_data(review_list)
     cleanup_review = pre_processing.review_cleanup_symbols(review_filter_labeled_data)
     sentence_list = pre_processing.sentence_tokenize_of_review(cleanup_review)
@@ -54,21 +55,32 @@ def main():
     noun_list = product_aspects_extraction.noun_chunking(pos_tagged_review_list)
     noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list)
     lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
-    #pre_processing.get_synonyms_set(lemmatized)
+    product_list = pre_processing.get_synonyms_set(lemmatized)
 
     # op_list = opinion_extraction.extract_opinion(pos_tagged_review_list)
     # opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
 
     # precision = evaluation_matrix.precision(len(lemmatized), 179)
-    # print(len(lemmatized),lemmatized)
+    print(len(noun_list_without_stopwords),noun_list_without_stopwords)
     # pre_processing.get_synonym_sets()
     # print(len(noun_list_without_stopwords),noun_list_without_stopwords)
-    calculate_relative_frequency_tags(pos_tagged_review_list)
+    # calculate_relative_frequency_tags(pos_tagged_review_list)
 
-    # manual_labeled_product_aspect = msc.extract_manual_labeled_aspect(review_list)
+    aspect_notin_noun_list=[]
+    aspect_in_noun_list = []
+    manual_labeled_product_aspect = msc.extract_manual_labeled_aspect(review_list)
+    print(len(product_list), product_list)
+    print(len(manual_labeled_product_aspect), manual_labeled_product_aspect)
+    for asp, cnt in noun_list_without_stopwords:
+        aspect_in_noun_list.append(asp)
+
+    for aspect, count in manual_labeled_product_aspect:
+        if aspect not in aspect_in_noun_list:
+            aspect_notin_noun_list.append(aspect)
+    print(len(aspect_notin_noun_list),aspect_notin_noun_list)
     # for aspect, count in manual_labeled_product_aspect:
-    #     # print(aspect)
-    #     write_to_file('product_aspects.txt', aspect + '\n')
+        # print(aspect, count)
+        # write_to_file('product_aspects_Hitachi router.txt', aspect + '\n')
 
 if __name__ == '__main__':
     main()

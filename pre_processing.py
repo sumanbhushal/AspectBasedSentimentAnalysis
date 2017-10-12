@@ -4,6 +4,13 @@ from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 
 
+def extract_each_review(review):
+    for rw in review.split("[t]"):
+        if rw != '':
+            #database.insert_into_review_table(rw)
+            pass
+
+
 def review_cleanup_labeled_data(sentences):
     """
     Cleaning up the review (removing explicitly mentioned product aspect and their sentiment score
@@ -31,7 +38,12 @@ def review_cleanup_labeled_data(sentences):
     rg_exp_single_words_aspects = re.compile('(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
     review_filtered_single_words_aspects = re.sub(rg_exp_single_words_aspects, '', review_filtered_two_words_aspects)
 
-    return review_filtered_single_words_aspects
+    # Removing title [t]
+    rg_exp_title = re.compile('(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    review_filtered_title = re.sub(rg_exp_title, '', review_filtered_single_words_aspects)
+    #print(re.findall(rg_exp_title, review_filtered_single_words_aspects), len(re.findall(rg_exp_title, review_filtered_single_words_aspects)))
+
+    return review_filtered_title
 
 
 def review_cleanup_symbols(sentences):
@@ -121,23 +133,29 @@ def lemmatization(product_aspect_list):
 
 
 def get_synonyms_set(noun_list):
-    print(noun_list)
     product_aspects_dictionary = {}
+    noun_list_replacing_space = []
+    for noun, count in noun_list:
+        rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
+        noun_list_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', noun)
+        new_noun_count_pair = (noun_list_replacing_space_with_underscore, count)
+        noun_list_replacing_space.append(new_noun_count_pair)
+    # print(len(noun_list_replacing_space), noun_list_replacing_space)
     for noun, count in noun_list:
         synonyms = []
         for syn in wordnet.synsets(noun):
             for lemma in syn.lemmas():
                 synonyms.append(lemma.name())
-        # print(synonyms)
+        #print(synonyms)
         if synonyms:
-            for nn, cc in noun_list:
+            for nn, cc in noun_list_replacing_space:
                 if nn in synonyms:
                     noun_count_pair = (nn, cc)
                     replace_value = (noun, cc)
-                    noun_list[noun_list.index(noun_count_pair)] = replace_value
+                    noun_list_replacing_space[noun_list_replacing_space.index(noun_count_pair)] = replace_value
 
-    print(len(noun_list), noun_list)
-    for noun, count in noun_list:
+    # print(len(noun_list), noun_list)
+    for noun, count in noun_list_replacing_space:
         if noun in product_aspects_dictionary:
             product_aspects_dictionary[noun] = (product_aspects_dictionary[noun]) + count
         else:
