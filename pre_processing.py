@@ -1,14 +1,7 @@
 import re
-from nltk import word_tokenize, sent_tokenize, pos_tag
+from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
-
-
-def extract_each_review(review):
-    for rw in review.split("[t]"):
-        if rw != '':
-            #database.insert_into_review_table(rw)
-            pass
 
 
 def review_cleanup_labeled_data(sentences):
@@ -57,7 +50,15 @@ def review_cleanup_symbols(sentences):
 
     # Removing ... symbols
     reg_exp_symbol2 = re.compile('(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
-    final_filtered_review = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
+    review_filtered_symbol2 = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
+
+    # Removing ,,, symbols
+    reg_exp_symbol3 = re.compile('(,)(,)(,)', re.IGNORECASE | re.DOTALL)
+    review_filtered_symbol3 = re.sub(reg_exp_symbol3, '', review_filtered_symbol2)
+
+    # Removing ,, symbols
+    reg_exp_symbol4 = re.compile('(,)(,)', re.IGNORECASE | re.DOTALL)
+    final_filtered_review = re.sub(reg_exp_symbol4, '', review_filtered_symbol3)
 
     # Removing , symbols at the starting of line
     # reg_exp_symbol3 = re.compile('[^,]', re.IGNORECASE | re.DOTALL)
@@ -83,18 +84,14 @@ def word_tokenize_review(sentence_list):
     :param sentence_list:
     :return: list of word tokenize
     """
-    return [word_tokenize(sentences) for sentences in sentence_list]
-
-
-# POS tagging
-def pos_tagging(tokeninzed_sentence_list):
-    """
-
-    :param tokeninzed_sentence_list: word tokenize consumer review
-    :return: List of word with POS tagging
-    """
-    pos_tagged = [pos_tag(sentences) for sentences in tokeninzed_sentence_list]
-    return pos_tagged
+    ids_tokenize_value = []
+    for sent_id, review_id, sentences in sentence_list:
+        sent_id = sent_id
+        review_id = review_id
+        word_tokenize_sent = word_tokenize(sentences)
+        combine_value = (review_id, sent_id, word_tokenize_sent)
+        ids_tokenize_value.append(combine_value)
+    return ids_tokenize_value
 
 
 # Filter Stopwords - (English)

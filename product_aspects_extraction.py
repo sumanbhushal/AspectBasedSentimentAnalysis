@@ -8,21 +8,17 @@ def noun_chunking(pos_tagged_text):
     :return:
     """
     noun_list_after_chunk = []
-    aspect_dictionary = {}
     chunkRegExpress = r"""ProductAspect: {<NN.*>+}"""
     chunkParsar = nltk.RegexpParser(chunkRegExpress)
-    for pos_tagged_content in pos_tagged_text:
+    for review_id, sent_id, pos_tagged_content in pos_tagged_text:
         chunked = chunkParsar.parse(pos_tagged_content)
-        #chunked.draw()
-        #print(chunked)
+        noun_list_per_sentence=[]
         for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
-            noun_list_after_chunk.append(" ".join(word for word, pos in subtree.leaves()).lower())
 
-    for aspect in noun_list_after_chunk:
-        if (aspect_dictionary.keys()!= aspect):
-            aspect_dictionary[aspect] = noun_list_after_chunk.count(aspect)
-    outputAspect = sorted(aspect_dictionary.items(), key=lambda x: x[1], reverse=True)
-    return outputAspect
+            noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
+        combine_value = (review_id, sent_id, noun_list_per_sentence)
+        noun_list_after_chunk.append(combine_value)
+    return noun_list_after_chunk
 
 
 def extract_aspect_from_opinion(pos_tagged_sentences):
@@ -62,11 +58,31 @@ def extract_aspect_from_opinion(pos_tagged_sentences):
 
 #Extraction Noun from sentence
 def extract_noun(pos_tagged_review):
-    noun_collection = []
-    for word in pos_tagged_review:
-        if word[1][0] == 'N':
-            noun_collection.append(word[0])
-    return noun_collection
+    print(pos_tagged_review)
+    prev_word = ''
+    prev_tag = ''
+    curr_word = ''
+    noun_list = []
+    noun_list_Dict = {}
+    # Extracting Aspects
+    for pos_tagged_content in pos_tagged_review:
+        for word, pos in pos_tagged_content:
+            if (pos == 'NN' or pos == 'NNP'):
+                if (prev_tag == 'NN' or prev_tag == 'NNP'):
+                    curr_word = prev_word + ' ' + word
+                else:
+                    noun_list.append(prev_word.lower())
+                    curr_word = word
+            prev_word = curr_word
+            prev_tag = pos
+
+    # Eliminating aspect which has 1 or less count
+    for aspect in noun_list:
+        if (noun_list.count(aspect) > 1):
+            if (noun_list_Dict.keys() != aspect):
+                noun_list_Dict[aspect] = noun_list.count(aspect)
+    outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
+    print(len(outputAspect), outputAspect)
 
 
 def generate_ngrams(input_text, n):

@@ -1,4 +1,37 @@
-import re
+import re, config
+
+
+def write_to_file(filename, output_content):
+    with open(config.Output_file_path + filename, 'a') as output:
+        for text in output_content:
+            output.write(text)
+
+
+
+def calculate_relative_frequency_tags(pos_tagged_review_list):
+    """
+    Calculation to estimate the relative frequency of different tags following a certain tag
+    :param pos_tagged_review_list:
+    :return:
+    """
+    tags_relative_frequency = []
+    tags_relative_frequency_dictionary = {}
+    pos_tags = ['NN', 'JJ', 'VB', 'DT', '.', 'VBP']
+    print(pos_tagged_review_list)
+    for tags in pos_tags:
+        for word_pos in pos_tagged_review_list:
+            for word, pos in word_pos:
+                if pos in pos_tags:
+                    word_pos_position = (word, pos)
+                    prev_pos_current_pos = ( word_pos[word_pos.index(word_pos_position) - 1][1], pos)
+                    tags_relative_frequency.append(prev_pos_current_pos)
+
+    for current_prev_tag in tags_relative_frequency:
+        if (tags_relative_frequency_dictionary.keys()!= current_prev_tag):
+            tags_relative_frequency_dictionary[current_prev_tag] = tags_relative_frequency.count(current_prev_tag)
+
+        combine_tag_frequency = sorted(tags_relative_frequency_dictionary.items(), key=lambda x: x[1], reverse=True)
+    print(len(combine_tag_frequency), combine_tag_frequency)
 
 
 def extract_manual_labeled_aspect(review):
