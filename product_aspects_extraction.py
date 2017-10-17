@@ -65,7 +65,7 @@ def extract_noun(pos_tagged_review):
     noun_list = []
     noun_list_Dict = {}
     # Extracting Aspects
-    for pos_tagged_content in pos_tagged_review:
+    for review_id, sent_id, pos_tagged_content in pos_tagged_review:
         for word, pos in pos_tagged_content:
             if (pos == 'NN' or pos == 'NNP'):
                 if (prev_tag == 'NN' or prev_tag == 'NNP'):
@@ -78,11 +78,12 @@ def extract_noun(pos_tagged_review):
 
     # Eliminating aspect which has 1 or less count
     for aspect in noun_list:
-        if (noun_list.count(aspect) > 1):
-            if (noun_list_Dict.keys() != aspect):
-                noun_list_Dict[aspect] = noun_list.count(aspect)
+        # if (noun_list.count(aspect) > 1):
+        if (noun_list_Dict.keys() != aspect):
+            noun_list_Dict[aspect] = noun_list.count(aspect)
     outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
     print(len(outputAspect), outputAspect)
+    return outputAspect
 
 
 def generate_ngrams(input_text, n):

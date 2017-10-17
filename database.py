@@ -1,4 +1,5 @@
 import pymysql, pre_processing
+from apyori import apriori
 
 try:
     connection = pymysql.connect(
@@ -80,5 +81,20 @@ def insert_candidate_aspect_into_db(candidate_aspects):
                             "VALUES (%s, %s, %s)")
             cursor.execute(insert_query, insert_value)
     connection.commit()
+
+def fetch_candidate_aspect_db():
+    select_sql = 'SELECT * from candidate_aspect_per_sentence'
+    cursor.execute(select_sql)
+    return cursor.fetchall()
+
+# def test():
+#     candidate_aspect = fetch_candidate_aspect_db()
+#     ca_list = []
+#     for id, review_id, sent_id, ca in candidate_aspect:
+#         ca_list.append(ca.split(','))
+#
+#         results = list(apriori(ca_list))
+#         print(results)
+# test()
 # cursor.close()
 # connection.close()
