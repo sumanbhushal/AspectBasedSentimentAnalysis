@@ -64,6 +64,24 @@ def fetch_sentence_from_sentence_table():
     cursor.execute(select_sql)
     return cursor.fetchall()
 
+# Inserting POS tagged Sentence into database
+def insert_postagged_sent_into_db(pos_tagged_sentences):
+    for review_id, sent_id, sent in pos_tagged_sentences:
+        convert_sent_into_string = str(sent).strip('[]')
+        insert_value = (sent_id, review_id, convert_sent_into_string)
+        insert_query = ("INSERT INTO pos_tagged_sentences "
+                        "(sentence_id, review_id, pos_tagged_sentences)"
+                        "VALUES (%s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+# Fetching POS tagged Sentence from Database
+def fetach_pos_tagged_sentence():
+    select_sql_query = 'SELECT * From pos_tagged_sentences'
+    cursor.execute(select_sql_query)
+    return cursor.fetchall()
+
+
 def insert_candidate_aspect_into_db(candidate_aspects):
     for review_id, sent_id, can_asp in candidate_aspects:
 
@@ -87,6 +105,56 @@ def fetch_candidate_aspect_db():
     cursor.execute(select_sql)
     return cursor.fetchall()
 
+
+def insert_unigrams_into_db(review_id, sent_id, unigram_list):
+    for unigram in unigram_list:
+        convert_unigram_into_string = str(unigram).strip('[]')
+        insert_value = (review_id, sent_id, convert_unigram_into_string)
+        insert_query = ("INSERT INTO unigram "
+                        "(review_id, sentence_id, unigram)"
+                        "VALUES (%s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+def insert_bigrams_into_db(review_id, sent_id, bigrams_list):
+    for bigrams in bigrams_list:
+        convert_bigrams_into_string = str(bigrams).strip('[]')
+        insert_value = (review_id, sent_id, convert_bigrams_into_string)
+        insert_query = ("INSERT INTO bigrams "
+                        "(review_id, sentence_id, bigrams)"
+                        "VALUES (%s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+def insert_trigrams_into_db(review_id, sent_id, trigrams_list):
+    for trigrams in trigrams_list:
+        convert_trigrams_into_string = str(trigrams).strip('[]')
+        insert_value = (review_id, sent_id, convert_trigrams_into_string)
+        insert_query = ("INSERT INTO trigrams "
+                        "(review_id, sentence_id, trigrams)"
+                        "VALUES (%s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+def insert_quadgrams_into_db(review_id, sent_id, quadgrams_list):
+    for quadgrams in quadgrams_list:
+        convert_quadgrams_into_string = str(quadgrams).strip('[]')
+        insert_value = (review_id, sent_id, convert_quadgrams_into_string)
+        insert_query = ("INSERT INTO quadgrams "
+                        "(review_id, sentence_id, quadgrams)"
+                        "VALUES (%s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+def insert_pentagrams_into_db(review_id, sent_id, pentagrams_list):
+    for pentagrams in pentagrams_list:
+        convert_pentagrams_into_string = str(pentagrams).strip('[]')
+        insert_value = (review_id, sent_id, convert_pentagrams_into_string)
+        insert_query = ("INSERT INTO pentagrams "
+                        "(review_id, sentence_id, pentagrams)"
+                        "VALUES (%s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
 # def test():
 #     candidate_aspect = fetch_candidate_aspect_db()
 #     ca_list = []

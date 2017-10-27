@@ -1,4 +1,5 @@
-import re, config
+import re, config, database
+from nltk.util import ngrams
 
 
 def write_to_file(filename, output_content):
@@ -79,3 +80,93 @@ def extract_manual_labeled_aspect(review):
         output_aspects.append(new_noun_count_pair)
      #print(len(output_aspects), output_aspects)
     return output_aspects
+
+
+def extract_new_manual_labeled_aspect():
+    review = open(config.Output_file_path + "M_label Hitachi roter.txt", "r").read()
+    product_aspect_list = []
+    output_aspects = []
+    aspect_dictionary = {}
+
+    rg_exp_for_3plus = rg_exp = re.compile('(<feature>\\w+-(?:[a-z][a-z]+\\s+\\w+)<\\/feature>)', re.IGNORECASE | re.DOTALL)
+    product_aspect_list.append(re.findall(rg_exp_for_3plus, review))
+    # print(re.findall(rg_exp_for_3plus, review))
+
+    # extract explicit product aspect formed with two words and a hyperlink and sentiment score
+    rg_exp_for_2plus = re.compile('(<feature>\\w+-(?:[a-z][a-z]+\\s+\\w+)<\\/feature>)', re.IGNORECASE | re.DOTALL)
+    product_aspect_list.append(re.findall(rg_exp_for_2plus, review))
+
+    # extract explicit product aspect formed with two words and a hyperlink and sentiment score
+    rg_exp_for_1plus = re.compile('(<feature>\\w+-\\w+<\\/feature>)', re.IGNORECASE | re.DOTALL)
+    product_aspect_list.append(re.findall(rg_exp_for_1plus, review))
+
+    # extract explict product aspect with alphanumeric characters and sentiment score
+    rg_exp_alphanumeric = re.compile('(<feature>(?:[a-z][a-z]*[0-9]+[a-z0-9]*)<\\/feature>)', re.IGNORECASE | re.DOTALL)
+    product_aspect_list.append(re.findall(rg_exp_alphanumeric, review))
+
+    # extract explict product aspect with two words separated with space and sentiment score
+    rg_exp_two_words_aspects = rg_exp = re.compile('(<feature>\\w+\\s+\\w+<\\/feature>)', re.IGNORECASE | re.DOTALL)
+    product_aspect_list.append(re.findall(rg_exp_two_words_aspects, review))
+
+    # extract explict product aspect with single words and sentiment score
+    rg_exp_single_words_aspects = re.compile('(<feature>\\w+<\\/feature>)', re.IGNORECASE | re.DOTALL)
+    product_aspect_list.append(re.findall(rg_exp_single_words_aspects, review))
+
+    product_aspect = []
+    for aspect in product_aspect_list:
+        for aa in aspect:
+            rg_exp_opening_featrue_tag = re.compile('(<feature>)', re.IGNORECASE | re.DOTALL)
+            product_aspect_removing_opening_tag = re.sub(rg_exp_opening_featrue_tag, '', aa)
+            rg_exp_closing_feature_tag = re.compile('(<\\/feature>)', re.IGNORECASE | re.DOTALL)
+            product_aspect_removing_closing_tag = re.sub(rg_exp_closing_feature_tag, '', product_aspect_removing_opening_tag)
+            product_aspect.append(re.sub(rg_exp_closing_feature_tag, '', product_aspect_removing_closing_tag).lower())
+    #print(len(product_aspect), product_aspect)
+
+    for asp in product_aspect:
+        if (aspect_dictionary.keys()!= asp):
+            aspect_dictionary[asp] = product_aspect.count(asp)
+    sorted_aspects_with_count = sorted(aspect_dictionary.items(), key=lambda x: x[1], reverse=True)
+
+    for noun, count in sorted_aspects_with_count:
+        rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
+        noun_list_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', noun)
+        new_noun_count_pair = (noun_list_replacing_space_with_underscore, count)
+        output_aspects.append(new_noun_count_pair)
+    #print(len(output_aspects), output_aspects)
+    return output_aspects
+
+
+def generate_unigram(tokenized_sentence_list):
+    unigrams = []
+    for review_id, sent_id, sent in tokenized_sentence_list:
+        unigrams = list(ngrams(sent, 1))
+        database.insert_unigrams_into_db(review_id, sent_id, unigrams)
+
+
+
+def generate_bigram(tokenized_sentence_list):
+    bigrams = []
+    for review_id, sent_id, sent in tokenized_sentence_list:
+        bigrams = list(ngrams(sent, 2))
+        database.insert_bigrams_into_db(review_id, sent_id, bigrams)
+
+
+def generate_tigram(tokenized_sentence_list):
+    trigrams = []
+    for review_id, sent_id, sent in tokenized_sentence_list:
+        trigrams = list(ngrams(sent, 3))
+        database.insert_trigrams_into_db(review_id, sent_id, trigrams)
+
+
+def generate_quadgram(tokenized_sentence_list):
+    quadgrams = []
+    for review_id, sent_id, sent in tokenized_sentence_list:
+        quadgrams = list(ngrams(sent, 4))
+        database.insert_quadgrams_into_db(review_id, sent_id, quadgrams)
+
+
+def generate_pentagram(tokenized_sentence_list):
+    pentagrams = []
+    for review_id, sent_id, sent in tokenized_sentence_list:
+        pentagrams = list(ngrams(sent, 5))
+        database.insert_pentagrams_into_db(review_id, sent_id, pentagrams)

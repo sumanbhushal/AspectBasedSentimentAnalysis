@@ -58,7 +58,6 @@ def extract_aspect_from_opinion(pos_tagged_sentences):
 
 #Extraction Noun from sentence
 def extract_noun(pos_tagged_review):
-    print(pos_tagged_review)
     prev_word = ''
     prev_tag = ''
     curr_word = ''
@@ -78,11 +77,11 @@ def extract_noun(pos_tagged_review):
 
     # Eliminating aspect which has 1 or less count
     for aspect in noun_list:
-        # if (noun_list.count(aspect) > 1):
-        if (noun_list_Dict.keys() != aspect):
-            noun_list_Dict[aspect] = noun_list.count(aspect)
+        if (noun_list.count(aspect) > 1):
+            if (noun_list_Dict.keys() != aspect):
+                noun_list_Dict[aspect] = noun_list.count(aspect)
     outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    print(len(outputAspect), outputAspect)
+    # print(len(outputAspect), outputAspect)
     return outputAspect
 
 

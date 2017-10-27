@@ -28,6 +28,7 @@ def compactness_pruning():
             if fp in sentences.lower():
                 word_index_dict = {}
                 for fp_word in fp.split():
+                    print(fp_word)
                     for sent in words_in_sentence:
                         if fp_word in sent:
                             # print(fp, sent.index(fp_word))
@@ -39,9 +40,9 @@ def redundancy_pruning():
     noun_for_each_sentence= get_sentences_with_terms()
     noun_list = get_all_noun_from_all_sentences(noun_for_each_sentence)
 
+    get_term_in_number_of_sents (noun_for_each_sentence, noun_list)
+    get_aspect_superset_with_count(noun_list)
 
-    # get_term_in_number_of_sents (sentence_list, noun_list)
-    # get_aspect_superset_with_count(noun_list)
 
 
 def get_sentences_with_terms():
@@ -70,7 +71,7 @@ def get_term_in_number_of_sents(sentences, noun_list):
             for s in sentences:
                 if term in s:
                     term_psupport_dict[term]+=1
-    # print(term_psupport_dict)
+    print(term_psupport_dict)
 
 def get_aspect_superset_with_count(noun_list):
     output_superset_with_count = []
@@ -84,8 +85,9 @@ def get_aspect_superset_with_count(noun_list):
         for asp in list_of_aspect_superset:
             if aspect_count_dict.keys() != asp:
                 aspect_count_dict[asp] = list_of_aspect_superset.count(asp)
-        # print(aspect_count_dict)
+        print(aspect_count_dict)
         output_superset_with_count.append(sorted(aspect_count_dict.items(), key=lambda x: x[1], reverse=True))
+    # print(output_superset_with_count)
     return output_superset_with_count
 
     # for aspect in noun_list:
