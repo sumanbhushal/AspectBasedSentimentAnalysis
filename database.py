@@ -51,9 +51,9 @@ def fetch_sentences_from_review(review):
         if rw != '':
             filter_rw = pre_processing.review_cleanup_labeled_data(rw)
             filter_symbol_rw = pre_processing.review_cleanup_symbols(filter_rw)
-            insert_into_review_table(filter_symbol_rw)
+            # insert_into_review_table(filter_symbol_rw)
 
-    insert_sentence_into_sentence_table()
+    # insert_sentence_into_sentence_table()
     select_sql = 'SELECT * from sentences'
     cursor.execute(select_sql)
     return cursor.fetchall()
@@ -67,7 +67,7 @@ def fetch_sentence_from_sentence_table():
 # Inserting POS tagged Sentence into database
 def insert_postagged_sent_into_db(pos_tagged_sentences):
     for review_id, sent_id, sent in pos_tagged_sentences:
-        convert_sent_into_string = str(sent).strip('[]')
+        convert_sent_into_string = str(sent)
         insert_value = (sent_id, review_id, convert_sent_into_string)
         insert_query = ("INSERT INTO pos_tagged_sentences "
                         "(sentence_id, review_id, pos_tagged_sentences)"
@@ -77,9 +77,12 @@ def insert_postagged_sent_into_db(pos_tagged_sentences):
 
 # Fetching POS tagged Sentence from Database
 def fetach_pos_tagged_sentence():
+    pos_tagged_review = []
     select_sql_query = 'SELECT * From pos_tagged_sentences'
     cursor.execute(select_sql_query)
-    return cursor.fetchall()
+    # row = cursor.fetchall()
+    pos_tagged_review = list(cursor)
+    return pos_tagged_review
 
 
 def insert_candidate_aspect_into_db(candidate_aspects):
@@ -108,8 +111,7 @@ def fetch_candidate_aspect_db():
 
 def insert_unigrams_into_db(review_id, sent_id, unigram_list):
     for unigram in unigram_list:
-        convert_unigram_into_string = str(unigram).strip('[]')
-        insert_value = (review_id, sent_id, convert_unigram_into_string)
+        insert_value = (review_id, sent_id, unigram)
         insert_query = ("INSERT INTO unigram "
                         "(review_id, sentence_id, unigram)"
                         "VALUES (%s, %s, %s)")

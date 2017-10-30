@@ -41,6 +41,12 @@ def review_cleanup_labeled_data(sentences):
 
 def review_cleanup_symbols(sentences):
     # Removing [#,{, }] symbols
+    reg_exp_main = re.compile('[^A-Za-z0-9^\n^\.^\"^\' ]+', re.IGNORECASE | re.DOTALL)
+    # review_filtered_main = re.findall(reg_exp_main, sentences)
+    review_filtered_main = re.sub(reg_exp_main, '', sentences)
+    print(review_filtered_main)
+
+    # Removing [#,{, }] symbols
     reg_exp_multi_symbol = re.compile('[#\\{\\}]', re.IGNORECASE | re.DOTALL)
     review_filtered_multi_symbol = re.sub(reg_exp_multi_symbol, '', sentences)
 
@@ -59,6 +65,7 @@ def review_cleanup_symbols(sentences):
     # Removing ,, symbols
     reg_exp_symbol4 = re.compile('(,)(,)', re.IGNORECASE | re.DOTALL)
     final_filtered_review = re.sub(reg_exp_symbol4, '', review_filtered_symbol3)
+
 
     # Removing , symbols at the starting of line
     # reg_exp_symbol3 = re.compile('[^,]', re.IGNORECASE | re.DOTALL)
@@ -101,6 +108,7 @@ def filter_stopwords(product_aspect_list):
     :return: product aspect list after filtering stopwords
     """
     stop_words = set(stopwords.words('english'))
+    stop_words.update('(', ')')
     aspect_list_without_stopwords = []
     for words in product_aspect_list:
         if words[0] not in stop_words:

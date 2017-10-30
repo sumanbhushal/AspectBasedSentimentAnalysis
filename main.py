@@ -13,37 +13,53 @@ def read_file():
 
 def main():
     review_list = read_file()
-    # sentence_list = database.fetch_sentences_from_review(review_list)
-    sentence_list = database.fetch_sentence_from_sentence_table()
+    sentence_list = database.fetch_sentences_from_review(review_list)
+    # sentence_list = database.fetch_sentence_from_sentence_table()
     word_tokenize_review_list = pre_processing.word_tokenize_review(sentence_list)
-    # pos_tagged_review_list = pos_tagging.standford_pos_tagging(word_tokenize_review_list)
-    pos_tagged_review_list = database.fetach_pos_tagged_sentence()
+
     # pos_tagged_review_list = pos_tagging.pos_tagging(word_tokenize_review_list)
-    print(pos_tagged_review_list)
-    noun_list = product_aspects_extraction.extract_noun(pos_tagged_review_list)
+    # noun_list = product_aspects_extraction.extract_noun(pos_tagged_review_list)
 
-    print(len(noun_list), noun_list)
+    ### Stanford POS tagging
+    pos_tagged_review_list = pos_tagging.stanford_pos_tagging(word_tokenize_review_list)
     # database.insert_postagged_sent_into_db(pos_tagged_review_list)
-    # msc.generate_bigram(word_tokenize_review_list)
+    pos_tagged_review_list = database.fetach_pos_tagged_sentence()
+    # # for pos_sent in pos_tagged_review_list:
+    # #     msc.write_to_file('stanford_pos_tagged_sentences.txt', str(pos_sent) + '\n')
+    noun_list_per_sent, noun_list = product_aspects_extraction.noun_chunking_for_stanford_pos(pos_tagged_review_list)
+    noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list)
+    print(len(noun_list_without_stopwords), noun_list_without_stopwords)
 
+    ### ngrams
+    # msc.generate_unigram(word_tokenize_review_list)
 
+    ### Chunking
     #noun_list_with_chunking= product_aspects_extraction.noun_chunking(pos_tagged_review_list)
     #database.insert_candidate_aspect_into_db(noun_list_with_chunking)
+
+    ### Aspect Pruning
     # aspect_pruning.redundancy_pruning()
-    #print(len(noun_list_with_chunking), noun_list_with_chunking)
+
+    ### Evaluations
+    # precision = evaluation_matrix.precision(noun_list_without_stopwords)
+    # recall = evaluation_matrix.recall(noun_list_without_stopwords)
+    # f_measure = evaluation_matrix.f_measure(precision, recall)
+
+    ### Extracting Opinion and Generating Opinion summary
+    # op_list = opinion_extraction.extract_opinon_of_feature(pos_tagged_review_list)
 
     # sentence_list = pre_processing.sentence_tokenize_of_review(cleanup_review)
     # # write_to_file('review.txt', sentence_list)
     # pos_tagged_review_list = pos_tagging.pos_tagging(word_tokenize_review_list)
     # noun_list = product_aspects_extraction.noun_chunking(pos_tagged_review_list)
-    # noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list)
+
     # lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
     # product_list = pre_processing.get_synonyms_set(lemmatized)
     #
-    ##op_list = opinion_extraction.extract_opinon_of_feature(pos_tagged_review_list)
+
     # # opinion_list = opinion_extraction.opinion_from_tagged_sents(pos_tagged_review_list)
 
-    # precision = evaluation_matrix.recall(noun_list)
+
     # print(len(noun_list_without_stopwords),noun_list_without_stopwords)
     # # pre_processing.get_synonym_sets()
     # # print(len(noun_list_without_stopwords),noun_list_without_stopwords)

@@ -21,7 +21,7 @@ def pos_tagging(tokenized_sentence_list):
     return ids_pos_value
 
 # Standford POS Tagging
-def standford_pos_tagging(tokenized_sentence_list):
+def stanford_pos_tagging(tokenized_sentence_list):
     # Add the jar and model via their path
     jar = config.Stanford_POS_Tagger_Path+'models/english-bidirectional-distsim.tagger'
     model = config.Stanford_POS_Tagger_Path+'stanford-postagger.jar'

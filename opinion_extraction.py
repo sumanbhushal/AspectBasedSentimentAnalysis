@@ -9,22 +9,24 @@ def extract_opinon_of_feature(pos_tagged_sentence_list):
         opinions = []
         sentences_with_feature = []
         for sent_id, review_id, sentences in pos_tagged_sentence_list:
-            for word, tag in sentences:
+            sentence_as_list = eval(sentences)
+            for word, tag in sentence_as_list:
                 if features == word:
                     sentences_with_feature.append(sentences)
                     # print(sentences.index(index_of_word), sentences)
 
         for sent in sentences_with_feature:
+            sent_as_list = eval(sent)
             feature_index_dict = {}
             opinion_index_dict = {}
             feature_index = []
-            for word, tag in sent:
+            for word, tag in sent_as_list:
                 if features == word:
                     index_of_word = (word, tag)
-                    feature_index = sent.index(index_of_word)
+                    feature_index = sent_as_list.index(index_of_word)
                 if tag == 'JJ' or tag == 'JJR' or tag == 'JJS':
                     index_of_opinion_word = (word, tag)
-                    opinion_index_dict[word] = sent.index(index_of_opinion_word)
+                    opinion_index_dict[word] = sent_as_list.index(index_of_opinion_word)
 
             if opinion_index_dict:
                 distance_btw_feature_opinion = {}

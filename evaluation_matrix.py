@@ -1,5 +1,5 @@
 import config, re
-
+import matplotlib.pyplot as plt
 
 def precision(extracted_aspect_list):
     """
@@ -26,7 +26,12 @@ def precision(extracted_aspect_list):
     print(len(ext_asp_intersection_actual),ext_asp_intersection_actual)
     precision_value = len(ext_asp_intersection_actual) / len(extracted_aspect)
     print(precision_value)
-    # return precision_value
+    asp_ext_intersection_actual = []
+    for asp in actual_aspect:
+        if asp not in extracted_aspect:
+            asp_ext_intersection_actual.append(asp)
+    print(len(asp_ext_intersection_actual), asp_ext_intersection_actual)
+    return precision_value
 
 
 def recall(extracted_aspect_list):
@@ -49,7 +54,7 @@ def recall(extracted_aspect_list):
 
     ext_asp_intersection_actual = []
     for ex_asp in extracted_aspect:
-        if ex_asp not in actual_aspect:
+        if ex_asp in actual_aspect:
             ext_asp_intersection_actual.append(ex_asp)
     print(len(ext_asp_intersection_actual), ext_asp_intersection_actual)
     recall_value = len(ext_asp_intersection_actual) / len(actual_aspect)
@@ -57,7 +62,7 @@ def recall(extracted_aspect_list):
     return recall_value
 
 
-def f_measure(precision, recall):
+def f_measure(precision_value, recall_value):
     """
     Calculate f-measure
     :param precision:
@@ -65,7 +70,9 @@ def f_measure(precision, recall):
     :return:
     """
     # f-measure = 2 *  precision * recall / precision + recall
-    f_measure_value = (2 * precision * recall) / (precision + recall)
+    print (precision_value, recall_value)
+    f_measure_value = (2 * precision_value * recall_value) / (precision_value + recall_value)
+    print("f-measure", f_measure_value)
     return f_measure_value
 
 
