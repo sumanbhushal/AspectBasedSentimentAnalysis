@@ -35,19 +35,38 @@ def compactness_pruning():
                             word_index_dict[fp_word] = sent.index(fp_word)
                 print(sent_id, word_index_dict)
 
+
 def redundancy_pruning():
     min_psupport_threshold = 3
-    noun_for_each_sentence= get_sentences_with_terms()
-    noun_list = get_all_noun_from_all_sentences(noun_for_each_sentence)
+    product_aspect_after_redundancy_pruning = []
+    candidate_product_aspect = database.fetch_candidate_aspects()
+    for aspect_id, review_id, sent_id, candidate_asp in candidate_product_aspect:
+        total_p_support = database.presence_of_aspect_in_sentence(candidate_asp)
+        if candidate_asp not in product_aspect_after_redundancy_pruning:
+            superset = database.fetch_superset_with_sentence_count(candidate_asp)
+            if len(superset) > 1:
+                for number_of_sent, super_set_asp in superset:
+                    if super_set_asp != candidate_asp:
+                        total_p_support = total_p_support - number_of_sent
+                        # print(super_set_asp, number_of_sent, "--", total_p_support)
+                if total_p_support > min_psupport_threshold:
+                    product_aspect_after_redundancy_pruning.append(candidate_asp)
+            else:
+                product_aspect_after_redundancy_pruning.append(candidate_asp)
+    # print(len(product_aspect_after_redundancy_pruning), product_aspect_after_redundancy_pruning)
+    return product_aspect_after_redundancy_pruning
 
-    get_term_in_number_of_sents (noun_for_each_sentence, noun_list)
-    get_aspect_superset_with_count(noun_list)
+
+    # noun_for_each_sentence= get_sentences_with_terms()
+    # noun_list = get_all_noun_from_all_sentences(noun_for_each_sentence)
+    # get_term_in_number_of_sents (noun_for_each_sentence, noun_list)
+    # get_aspect_superset_with_count(noun_list)
 
 
 
 def get_sentences_with_terms():
     terms_in_sentence = []
-    sentences_with_terms = database.fetch_candidate_aspect_db()
+    sentences_with_terms = database.fetch_candidate_aspect_per_sentence()
     for term_id, review_id, sent_id, term in sentences_with_terms:
         terms_in_sentence.append(term.split(','))
     return terms_in_sentence

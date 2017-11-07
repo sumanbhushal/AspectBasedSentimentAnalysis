@@ -40,8 +40,9 @@ def noun_chunking_for_stanford_pos(pos_tagged_text):
 
             noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
             noun_list.append(" ".join(word for word, pos in subtree.leaves()).lower())  # Generating one list of noun_words
-        combine_value = (review_id, sent_id, noun_list_per_sentence)
-        noun_list_after_chunk.append(combine_value)
+        if (noun_list_per_sentence):
+            combine_value = (review_id, sent_id, noun_list_per_sentence)
+            noun_list_after_chunk.append(combine_value)
 
 
     # Getting list of nouns with count (if necessary eliminating aspect which has 1 or less count)
@@ -50,21 +51,53 @@ def noun_chunking_for_stanford_pos(pos_tagged_text):
         if (noun_list_Dict.keys() != aspect):
             noun_list_Dict[aspect] = noun_list.count(aspect)
     outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    return noun_list_after_chunk, outputAspect
+    return noun_list_after_chunk
 
 #Chunking - to group JJ-NN/NNS
-def adj_noun_chunking_for_standford_pos(pos_tagged_text):
+def adj_noun_chunking_for_stanford_pos(pos_tagged_text):
     """
     Creating chunk regular expression to get the nouns and nouns phrase
     :param pos_tagged_text:
     :return:
     """
-    noun_list_after_chunk = []
-    noun_list = []
+    adj_noun_list_after_chunk = []
+    adj_noun_list = []
     noun_list_Dict = {}
-    chunkRegExpress = r"""ProductAspect: {<NN.*><VBZ.*>+}"""
-    # chunkRegExpress = r"""ProductAspect: {<JJ.?><NN.*>+}"""
+    # chunkRegExpress = r"""ProductAspect: {<NN.*><VBZ.*>+}"""
+    chunkRegExpress = r"""ProductAspect: {<JJ.?><NN.*>+}"""
     # chunkRegExpress = r"""ProductAspect: {<NN.*><VBZ.?>+}"""
+    chunkParsar = nltk.RegexpParser(chunkRegExpress)
+    for review_id, sent_id, pos_tagged_content in pos_tagged_text:
+        pos_tagged_list = eval(pos_tagged_content)
+        chunked = chunkParsar.parse(pos_tagged_list)
+        adj_noun_list_per_sentence=[]
+        for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
+
+            adj_noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
+            adj_noun_list.append(" ".join(word for word, pos in subtree.leaves()).lower())  # Generating one list of noun_words
+        combine_value = (review_id, sent_id, adj_noun_list_per_sentence)
+        adj_noun_list_after_chunk.append(combine_value)
+
+    # Getting list of nouns with count (if necessary eliminating aspect which has 1 or less count)
+    # for aspect in adj_noun_list:
+    #     # if (adj_noun_list.count(aspect) > 1):
+    #     if (noun_list_Dict.keys() != aspect):
+    #         noun_list_Dict[aspect] = adj_noun_list.count(aspect)
+    # outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
+    # print(len(outputAspect),outputAspect)
+    return adj_noun_list_after_chunk
+
+# Chunking - JJ (adjective as feaatures)
+def adj_chunking_for_stanford_pos(pos_tagged_text):
+    """
+    Creating chunk regular expression to get the nouns and nouns phrase
+    :param pos_tagged_text:
+    :return:
+    """
+    adjective_list_after_chunk = []
+    adjective_list = []
+    adjective_list_Dict = {}
+    chunkRegExpress = r"""ProductAspect: {<JJ.*>+}"""
     chunkParsar = nltk.RegexpParser(chunkRegExpress)
     for review_id, sent_id, pos_tagged_content in pos_tagged_text:
         pos_tagged_list = eval(pos_tagged_content)
@@ -73,20 +106,66 @@ def adj_noun_chunking_for_standford_pos(pos_tagged_text):
         for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
 
             noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
-            noun_list.append(" ".join(word for word, pos in subtree.leaves()).lower())  # Generating one list of noun_words
+            adjective_list.append(" ".join(word for word, pos in subtree.leaves()).lower())  # Generating one list of noun_words
         combine_value = (review_id, sent_id, noun_list_per_sentence)
-        noun_list_after_chunk.append(combine_value)
-
-    print(len(noun_list), noun_list)
+        adjective_list_after_chunk.append(combine_value)
 
     # Getting list of nouns with count (if necessary eliminating aspect which has 1 or less count)
-    for aspect in noun_list:
-        if (noun_list.count(aspect) > 1):
-            if (noun_list_Dict.keys() != aspect):
-                noun_list_Dict[aspect] = noun_list.count(aspect)
-    outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    print(len(outputAspect),outputAspect)
-    return noun_list_after_chunk, outputAspect
+    # for aspect in adjective_list:
+    #     # if (adjective_list.count(aspect) > 1):
+    #     if (adjective_list_Dict.keys() != aspect):
+    #         adjective_list_Dict[aspect] = adjective_list.count(aspect)
+    # outputAspect = sorted(adjective_list_Dict.items(), key=lambda x: x[1], reverse=True)
+    # print(len(outputAspect),outputAspect)
+    return adjective_list_after_chunk
+
+
+# Chunking - NN-VBZ (eg. on/off controls)
+def noun_verb_chunking_for_stanford_pos(pos_tagged_text):
+    """
+    Creating chunk regular expression to get the nouns and nouns phrase
+    :param pos_tagged_text:
+    :return:
+    """
+    noun_verb_list_after_chunk = []
+    noun_verb_list = []
+    chunkRegExpress = r"""ProductAspect: {<NN.*><VBZ.?>+}"""
+    chunkParsar = nltk.RegexpParser(chunkRegExpress)
+    for review_id, sent_id, pos_tagged_content in pos_tagged_text:
+        pos_tagged_list = eval(pos_tagged_content)
+        chunked = chunkParsar.parse(pos_tagged_list)
+        noun_verb_list_per_sentence=[]
+        for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
+
+            noun_verb_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
+        combine_value = (review_id, sent_id, noun_verb_list_per_sentence)
+        noun_verb_list_after_chunk.append(combine_value)
+
+    return noun_verb_list_after_chunk
+
+
+# Chunking - VBG-NN (verb, gerund/present participle- taking, Noun)
+def verb_noun_chunking_for_stanford_pos(pos_tagged_text):
+    """
+    Creating chunk regular expression to get the nouns and nouns phrase
+    :param pos_tagged_text:
+    :return:
+    """
+    verb_noun_list_after_chunk = []
+    verb_noun_list = []
+    chunkRegExpress = r"""ProductAspect: {<VBG.*><NN.?>+}"""
+    chunkParsar = nltk.RegexpParser(chunkRegExpress)
+    for review_id, sent_id, pos_tagged_content in pos_tagged_text:
+        pos_tagged_list = eval(pos_tagged_content)
+        chunked = chunkParsar.parse(pos_tagged_list)
+        verb_noun_list_per_sentence=[]
+        for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
+
+            verb_noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
+        combine_value = (review_id, sent_id, verb_noun_list_per_sentence)
+        verb_noun_list_after_chunk.append(combine_value)
+    return verb_noun_list_after_chunk
+
 
 def extract_aspect_from_opinion(pos_tagged_sentences):
     product_aspect = []

@@ -23,11 +23,12 @@ def insert_into_review_table(review):
 
 
 def insert_sentence_into_sentence_table():
+    truncate_sentence_table_sql = 'TRUNCATE TABLE sentences'
+    cursor.execute(truncate_sentence_table_sql)
+
     sql = 'SELECT * from review'
     cursor.execute(sql)
     reviews = cursor.fetchall()
-    truncate_sentence_table_sql = 'TRUNCATE TABLE sentences'
-    cursor.execute(truncate_sentence_table_sql)
     for id, review in reviews:
         for rw in review.split("\n"):
             if rw != '':
@@ -51,9 +52,9 @@ def fetch_sentences_from_review(review):
         if rw != '':
             filter_rw = pre_processing.review_cleanup_labeled_data(rw)
             filter_symbol_rw = pre_processing.review_cleanup_symbols(filter_rw)
-            # insert_into_review_table(filter_symbol_rw)
+            insert_into_review_table(filter_symbol_rw)
 
-    # insert_sentence_into_sentence_table()
+    insert_sentence_into_sentence_table()
     select_sql = 'SELECT * from sentences'
     cursor.execute(select_sql)
     return cursor.fetchall()
@@ -66,6 +67,9 @@ def fetch_sentence_from_sentence_table():
 
 # Inserting POS tagged Sentence into database
 def insert_postagged_sent_into_db(pos_tagged_sentences):
+    truncate_pos_tagged_sentences_table_sql = 'TRUNCATE TABLE pos_tagged_sentences'
+    cursor.execute(truncate_pos_tagged_sentences_table_sql)
+
     for review_id, sent_id, sent in pos_tagged_sentences:
         convert_sent_into_string = str(sent)
         insert_value = (sent_id, review_id, convert_sent_into_string)
@@ -103,8 +107,32 @@ def insert_candidate_aspect_into_db(candidate_aspects):
             cursor.execute(insert_query, insert_value)
     connection.commit()
 
-def fetch_candidate_aspect_db():
+
+def fetch_candidate_aspect_per_sentence():
     select_sql = 'SELECT * from candidate_aspect_per_sentence'
+    cursor.execute(select_sql)
+    return cursor.fetchall()
+
+def insert_single_candidate_aspect_per_row(candidate_aspects):
+    # trucate_table('candidate_aspect')
+    for review_id, sent_id, can_asp in candidate_aspects:
+        if can_asp:
+            for cand_asp in can_asp:
+                insert_value = (review_id, sent_id, cand_asp)
+                insert_query = ("INSERT INTO candidate_aspect "
+                                "(review_id, sentence_id, candidate_aspect)"
+                                "VALUES (%s, %s, %s)")
+                cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+
+def fetch_candidate_aspects():
+    select_sql = 'SELECT * from candidate_aspect'
+    cursor.execute(select_sql)
+    return cursor.fetchall()
+
+def fetch_candidate_aspects_with_sentence_count():
+    select_sql = 'SELECT count(*) as times, candidate_aspect FROM thesis.candidate_aspect group by candidate_aspect order by times desc;'
     cursor.execute(select_sql)
     return cursor.fetchall()
 
@@ -117,6 +145,16 @@ def insert_unigrams_into_db(review_id, sent_id, unigram_list):
                         "VALUES (%s, %s, %s)")
         cursor.execute(insert_query, insert_value)
     connection.commit()
+
+def fetch_unigrams():
+    select_sql = 'SELECT count(*) as times, unigram FROM thesis.unigram  group by unigram order by times desc;'
+    cursor.execute(select_sql)
+    return cursor.fetchall()
+
+def fetch_bigrams():
+    select_sql = 'SELECT count(*) as times, bigrams FROM thesis.bigrams group by bigrams order by times desc;'
+    cursor.execute(select_sql)
+    return cursor.fetchall()
 
 def insert_bigrams_into_db(review_id, sent_id, bigrams_list):
     for bigrams in bigrams_list:
@@ -157,6 +195,24 @@ def insert_pentagrams_into_db(review_id, sent_id, pentagrams_list):
                         "VALUES (%s, %s, %s)")
         cursor.execute(insert_query, insert_value)
     connection.commit()
+
+def trucate_table(table_name):
+    truncate_table_sql = 'TRUNCATE TABLE '+ table_name
+    cursor.execute(truncate_table_sql)
+    connection.commit()
+
+# Redundancy Pruning
+def presence_of_aspect_in_sentence(candidate_aspect):
+    sql_query = "SELECT distinct count(sentence_id) FROM thesis.candidate_aspect where candidate_aspect like '%" + candidate_aspect + "%';"
+    cursor.execute(sql_query)
+    total_number_of_sent =cursor.fetchone()
+    return total_number_of_sent[0]
+
+def fetch_superset_with_sentence_count(aspect):
+    cursor.callproc('superset_with_sentence_count', (aspect,))
+    return cursor.fetchall()
+
+
 # def test():
 #     candidate_aspect = fetch_candidate_aspect_db()
 #     ca_list = []

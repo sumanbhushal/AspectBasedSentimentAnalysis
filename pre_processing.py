@@ -41,30 +41,30 @@ def review_cleanup_labeled_data(sentences):
 
 def review_cleanup_symbols(sentences):
     # Removing [#,{, }] symbols
-    reg_exp_main = re.compile('[^A-Za-z0-9^\n^\.^\"^\' ]+', re.IGNORECASE | re.DOTALL)
+    reg_exp_main = re.compile('[^A-Za-z0-9^\n^\.^\"^\'^\- ]+', re.IGNORECASE | re.DOTALL)
     # review_filtered_main = re.findall(reg_exp_main, sentences)
     review_filtered_main = re.sub(reg_exp_main, '', sentences)
-    print(review_filtered_main)
+    # print(review_filtered_main)
 
-    # Removing [#,{, }] symbols
-    reg_exp_multi_symbol = re.compile('[#\\{\\}]', re.IGNORECASE | re.DOTALL)
-    review_filtered_multi_symbol = re.sub(reg_exp_multi_symbol, '', sentences)
-
-    # Removing =) symbols
-    reg_exp_symbol1 = re.compile('(=\\))', re.IGNORECASE | re.DOTALL)
-    review_filtered_symbol1 = re.sub(reg_exp_symbol1, '', review_filtered_multi_symbol)
-
-    # Removing ... symbols
-    reg_exp_symbol2 = re.compile('(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
-    review_filtered_symbol2 = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
-
-    # Removing ,,, symbols
-    reg_exp_symbol3 = re.compile('(,)(,)(,)', re.IGNORECASE | re.DOTALL)
-    review_filtered_symbol3 = re.sub(reg_exp_symbol3, '', review_filtered_symbol2)
-
-    # Removing ,, symbols
-    reg_exp_symbol4 = re.compile('(,)(,)', re.IGNORECASE | re.DOTALL)
-    final_filtered_review = re.sub(reg_exp_symbol4, '', review_filtered_symbol3)
+    # # Removing [#,{, }] symbols
+    # reg_exp_multi_symbol = re.compile('[#\\{\\}]', re.IGNORECASE | re.DOTALL)
+    # review_filtered_multi_symbol = re.sub(reg_exp_multi_symbol, '', sentences)
+    #
+    # # Removing =) symbols
+    # reg_exp_symbol1 = re.compile('(=\\))', re.IGNORECASE | re.DOTALL)
+    # review_filtered_symbol1 = re.sub(reg_exp_symbol1, '', review_filtered_multi_symbol)
+    #
+    # # Removing ... symbols
+    # reg_exp_symbol2 = re.compile('(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
+    # review_filtered_symbol2 = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
+    #
+    # # Removing ,,, symbols
+    # reg_exp_symbol3 = re.compile('(,)(,)(,)', re.IGNORECASE | re.DOTALL)
+    # review_filtered_symbol3 = re.sub(reg_exp_symbol3, '', review_filtered_symbol2)
+    #
+    # # Removing ,, symbols
+    # reg_exp_symbol4 = re.compile('(,)(,)', re.IGNORECASE | re.DOTALL)
+    # final_filtered_review = re.sub(reg_exp_symbol4, '', review_filtered_symbol3)
 
 
     # Removing , symbols at the starting of line
@@ -73,7 +73,7 @@ def review_cleanup_symbols(sentences):
     # review = re.findall(reg_exp_symbol3, final_filtered_review)
      #print(review)
 
-    return final_filtered_review
+    return review_filtered_main
 
 
 # Sentence Tokenization
@@ -108,11 +108,16 @@ def filter_stopwords(product_aspect_list):
     :return: product aspect list after filtering stopwords
     """
     stop_words = set(stopwords.words('english'))
-    stop_words.update('(', ')')
+    stop_words.update('(', ')', '.', '-', '--', '``', "'", '"')
     aspect_list_without_stopwords = []
-    for words in product_aspect_list:
-        if words[0] not in stop_words:
-            aspect_list_without_stopwords.append(words)
+    for sent_id, review_id, words in product_aspect_list:
+        product_aspect = []
+        for w in words:
+            if w not in stop_words:
+                product_aspect.append(w.lower())
+        if(product_aspect):
+            aspect_per_sent_after_stopwords = (sent_id, review_id, product_aspect)
+            aspect_list_without_stopwords.append(aspect_per_sent_after_stopwords)
     return aspect_list_without_stopwords
 
 

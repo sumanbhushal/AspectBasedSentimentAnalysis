@@ -4,6 +4,7 @@ currentWorkingDirectory = os.getcwd()
 
 Datasets_path = currentWorkingDirectory+"\Datasets\\"
 Output_file_path = currentWorkingDirectory+"\Files\\"
+Manual_labled_aspect_path = Output_file_path+"\manual_labeled_aspects\\"
 Stanford_POS_Tagger_Path = currentWorkingDirectory + "\stanford-postagger-full-2017-06-09\\"
 
 # java path

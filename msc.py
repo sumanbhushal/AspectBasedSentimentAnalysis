@@ -1,9 +1,9 @@
 import re, config, database
-from nltk.util import ngrams
+
 
 
 def write_to_file(filename, output_content):
-    with open(config.Output_file_path + filename, 'a') as output:
+    with open(config.Manual_labled_aspect_path + filename, 'a') as output:
         for text in output_content:
             output.write(text)
 
@@ -136,37 +136,15 @@ def extract_new_manual_labeled_aspect():
     return output_aspects
 
 
-def generate_unigram(tokenized_sentence_list):
-    unigrams = []
-    for review_id, sent_id, sent in tokenized_sentence_list:
-        unigrams = list(ngrams(sent, 1))
-        database.insert_unigrams_into_db(review_id, sent_id, unigrams)
-
-
-
-def generate_bigram(tokenized_sentence_list):
-    bigrams = []
-    for review_id, sent_id, sent in tokenized_sentence_list:
-        bigrams = list(ngrams(sent, 2))
-        database.insert_bigrams_into_db(review_id, sent_id, bigrams)
-
-
-def generate_tigram(tokenized_sentence_list):
-    trigrams = []
-    for review_id, sent_id, sent in tokenized_sentence_list:
-        trigrams = list(ngrams(sent, 3))
-        database.insert_trigrams_into_db(review_id, sent_id, trigrams)
-
-
-def generate_quadgram(tokenized_sentence_list):
-    quadgrams = []
-    for review_id, sent_id, sent in tokenized_sentence_list:
-        quadgrams = list(ngrams(sent, 4))
-        database.insert_quadgrams_into_db(review_id, sent_id, quadgrams)
-
-
-def generate_pentagram(tokenized_sentence_list):
-    pentagrams = []
-    for review_id, sent_id, sent in tokenized_sentence_list:
-        pentagrams = list(ngrams(sent, 5))
-        database.insert_pentagrams_into_db(review_id, sent_id, pentagrams)
+def generate_unique_list_of_manual_labeled_aspect(filename):
+    file = open(config.Output_file_path + filename + ".txt", "r").read()
+    manual_labeled_list = file.split('\n')
+    unique_aspect_list = []
+    for asp in manual_labeled_list:
+        if asp not in unique_aspect_list:
+            unique_aspect_list.append(asp)
+    for aspect in unique_aspect_list:
+        rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
+        aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
+        write_to_file(filename+"_ml.txt", aspect_replacing_space_with_underscore + '\n')
+    print(len(unique_aspect_list),unique_aspect_list)
