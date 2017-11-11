@@ -37,7 +37,7 @@ def compactness_pruning():
 
 
 def redundancy_pruning():
-    min_psupport_threshold = 3
+    min_psupport_threshold = 4
     product_aspect_after_redundancy_pruning = []
     candidate_product_aspect = database.fetch_candidate_aspects()
     for aspect_id, review_id, sent_id, candidate_asp in candidate_product_aspect:
@@ -48,12 +48,10 @@ def redundancy_pruning():
                 for number_of_sent, super_set_asp in superset:
                     if super_set_asp != candidate_asp:
                         total_p_support = total_p_support - number_of_sent
-                        # print(super_set_asp, number_of_sent, "--", total_p_support)
                 if total_p_support > min_psupport_threshold:
                     product_aspect_after_redundancy_pruning.append(candidate_asp)
             else:
                 product_aspect_after_redundancy_pruning.append(candidate_asp)
-    # print(len(product_aspect_after_redundancy_pruning), product_aspect_after_redundancy_pruning)
     return product_aspect_after_redundancy_pruning
 
 

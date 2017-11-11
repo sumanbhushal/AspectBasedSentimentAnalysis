@@ -11,8 +11,8 @@ def precision(extracted_aspect_list):
     # precision = extracted_aspect intersection actual_aspect/extracted_aspect
     actual_aspect = get_actual_aspect()
     extracted_aspect = []
-    # for aspect, count in extracted_aspect_list:
-    for count, aspect in extracted_aspect_list:
+    for aspect in extracted_aspect_list:
+        # for count, aspect in extracted_aspect_list:
         rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         extracted_aspect.append(aspect_replacing_space_with_underscore)
@@ -45,8 +45,8 @@ def recall(extracted_aspect_list):
     # recall = extracted_aspect intersection actual_aspect/actual_aspect
     actual_aspect = get_actual_aspect()
     extracted_aspect = []
-    # for aspect, count in extracted_aspect_list:
-    for count, aspect in extracted_aspect_list:
+    for aspect in extracted_aspect_list:
+        # for count, aspect in extracted_aspect_list:
         rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         extracted_aspect.append(aspect_replacing_space_with_underscore)

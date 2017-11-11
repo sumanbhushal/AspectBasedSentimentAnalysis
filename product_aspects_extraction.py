@@ -37,7 +37,6 @@ def noun_chunking_for_stanford_pos(pos_tagged_text):
         chunked = chunkParsar.parse(pos_tagged_list)
         noun_list_per_sentence=[]
         for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
-
             noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
             noun_list.append(" ".join(word for word, pos in subtree.leaves()).lower())  # Generating one list of noun_words
         if (noun_list_per_sentence):

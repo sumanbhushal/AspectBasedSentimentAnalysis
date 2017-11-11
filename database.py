@@ -70,7 +70,7 @@ def insert_postagged_sent_into_db(pos_tagged_sentences):
     truncate_pos_tagged_sentences_table_sql = 'TRUNCATE TABLE pos_tagged_sentences'
     cursor.execute(truncate_pos_tagged_sentences_table_sql)
 
-    for review_id, sent_id, sent in pos_tagged_sentences:
+    for sent_id, review_id, sent in pos_tagged_sentences:
         convert_sent_into_string = str(sent)
         insert_value = (sent_id, review_id, convert_sent_into_string)
         insert_query = ("INSERT INTO pos_tagged_sentences "
