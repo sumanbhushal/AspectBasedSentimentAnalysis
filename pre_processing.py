@@ -44,34 +44,6 @@ def review_cleanup_symbols(sentences):
     reg_exp_main = re.compile('[^A-Za-z0-9^\n^\.^\"^\'^\- ]+', re.IGNORECASE | re.DOTALL)
     # review_filtered_main = re.findall(reg_exp_main, sentences)
     review_filtered_main = re.sub(reg_exp_main, '', sentences)
-    # print(review_filtered_main)
-
-    # # Removing [#,{, }] symbols
-    # reg_exp_multi_symbol = re.compile('[#\\{\\}]', re.IGNORECASE | re.DOTALL)
-    # review_filtered_multi_symbol = re.sub(reg_exp_multi_symbol, '', sentences)
-    #
-    # # Removing =) symbols
-    # reg_exp_symbol1 = re.compile('(=\\))', re.IGNORECASE | re.DOTALL)
-    # review_filtered_symbol1 = re.sub(reg_exp_symbol1, '', review_filtered_multi_symbol)
-    #
-    # # Removing ... symbols
-    # reg_exp_symbol2 = re.compile('(\\.)(\\.)(\\.)', re.IGNORECASE | re.DOTALL)
-    # review_filtered_symbol2 = re.sub(reg_exp_symbol2, '', review_filtered_symbol1)
-    #
-    # # Removing ,,, symbols
-    # reg_exp_symbol3 = re.compile('(,)(,)(,)', re.IGNORECASE | re.DOTALL)
-    # review_filtered_symbol3 = re.sub(reg_exp_symbol3, '', review_filtered_symbol2)
-    #
-    # # Removing ,, symbols
-    # reg_exp_symbol4 = re.compile('(,)(,)', re.IGNORECASE | re.DOTALL)
-    # final_filtered_review = re.sub(reg_exp_symbol4, '', review_filtered_symbol3)
-
-
-    # Removing , symbols at the starting of line
-    # reg_exp_symbol3 = re.compile('[^,]', re.IGNORECASE | re.DOTALL)
-    # reg_exp_symbol3 = re.compile('(,)((?:[a-z][a-z]+))', re.IGNORECASE | re.DOTALL)
-    # review = re.findall(reg_exp_symbol3, final_filtered_review)
-     #print(review)
 
     return review_filtered_main
 

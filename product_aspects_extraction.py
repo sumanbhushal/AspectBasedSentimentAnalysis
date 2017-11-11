@@ -1,5 +1,21 @@
 import nltk, re
 
+#Extraction Nouns from sentence
+def extract_nouns_from_standford_pos(pos_tagged_review):
+    nouns_list = []
+    # Extracting Aspects
+    for review_id, sent_id, pos_tagged_content in pos_tagged_review:
+        pos_list = eval(pos_tagged_content)
+        noun_list_per_sentence = []
+        for word, pos in pos_list:
+            if (pos == 'NN' or pos == 'NNS'):
+                noun_list_per_sentence.append(word.lower())
+        if (noun_list_per_sentence):
+            combine_value = (review_id, sent_id, noun_list_per_sentence)
+            nouns_list.append(combine_value)
+    return nouns_list
+
+
 #Chunking - to group NN/NNS
 def noun_chunking(pos_tagged_text):
     """
@@ -210,6 +226,7 @@ def extract_noun(pos_tagged_review):
     noun_list_Dict = {}
     # Extracting Aspects
     for review_id, sent_id, pos_tagged_content in pos_tagged_review:
+        print(pos_tagged_content)
         for word, pos in pos_tagged_content:
             if (pos == 'NN' or pos == 'NNP'):
                 if (prev_tag == 'NN' or prev_tag == 'NNP'):
@@ -230,40 +247,33 @@ def extract_noun(pos_tagged_review):
     return outputAspect
 
 #Extraction Noun from sentence
-def extract_noun_from_standford_pos(pos_tagged_review):
-    prev_word = ''
-    prev_tag = ''
-    curr_word = ''
-    noun_list = []
-    noun_list_Dict = {}
-    # Extracting Aspects
-    for review_id, sent_id, pos_tagged_content in pos_tagged_review:
-        pos_list = eval(pos_tagged_content)
-        for word, pos in pos_list:
-            if (pos == 'NN' or pos == 'NNP'):
-                if (prev_tag == 'NN' or prev_tag == 'NNP'):
-                    curr_word = prev_word + ' ' + word
-                else:
-                    noun_list.append(prev_word.lower())
-                    curr_word = word
-            prev_word = curr_word
-            prev_tag = pos
+# def extract_noun_from_standford_pos(pos_tagged_review):
+#     prev_word = ''
+#     prev_tag = ''
+#     curr_word = ''
+#     noun_list = []
+#     noun_list_Dict = {}
+#     # Extracting Aspects
+#     for review_id, sent_id, pos_tagged_content in pos_tagged_review:
+#         pos_list = eval(pos_tagged_content)
+#         for word, pos in pos_list:
+#             if (pos == 'NN' or pos == 'NNP'):
+#                 if (prev_tag == 'NN' or prev_tag == 'NNP'):
+#                     curr_word = prev_word + ' ' + word
+#                 else:
+#                     noun_list.append(prev_word.lower())
+#                     curr_word = word
+#             prev_word = curr_word
+#             prev_tag = pos
+#
+#     # Eliminating aspect which has 1 or less count
+#     for aspect in noun_list:
+#         # if (noun_list.count(aspect) > 1):
+#         if (noun_list_Dict.keys() != aspect):
+#             noun_list_Dict[aspect] = noun_list.count(aspect)
+#     outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
+#     # print(len(outputAspect), outputAspect)
+#     return outputAspect
 
-    # Eliminating aspect which has 1 or less count
-    for aspect in noun_list:
-        # if (noun_list.count(aspect) > 1):
-        if (noun_list_Dict.keys() != aspect):
-            noun_list_Dict[aspect] = noun_list.count(aspect)
-    outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    # print(len(outputAspect), outputAspect)
-    return outputAspect
-
-def generate_ngrams(input_text, n):
-    ngram_list = []
-    input = input_text.split(' ')
-    for i in range(len(input) - n+1):
-        ngram_list.append(input[i:i+n])
-    #print(ngram_list)
-    return ngram_list
 
 

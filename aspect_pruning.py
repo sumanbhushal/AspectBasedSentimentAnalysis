@@ -8,33 +8,142 @@ def compactness_pruning():
     #             Measure the distance between every two words;
     #             if (words distance > 3)
     #                 Remove the feature from the list;
-    noun_for_each_sentence = get_sentences_with_terms()
-    noun_list = get_all_noun_from_all_sentences(noun_for_each_sentence)
-    sentences_in_reviews = database.fetch_sentence_from_sentence_table()
-    words_in_sentence = []
+
+    candidate_feature_phrase = database.fetch_frequent_itemsets()
+    sentences_list = database.fetch_sentence_from_sentence_table()
+
+    feature_list_after_compactness_pruning = []
     feature_phase = []
+    feature_count_in_dict = {}
 
-    # for sent_id, review_id, sentences in sentences_in_reviews:
-    #     words_in_sentence.append(sentences.split())
-
-    for noun in noun_list:
-        word_in_noun_phrase = noun.split()
+    for feature in candidate_feature_phrase:
+        word_in_noun_phrase = feature.split()
         if len(word_in_noun_phrase) > 1:
-            feature_phase.append(noun)
+            feature_phase.append(feature)
+        else:
+            feature_list_after_compactness_pruning.append(feature)
 
-    for sent_id, review_id, sentences in sentences_in_reviews:
-        words_in_sentence.append((sentences.lower()).split())
-        for fp in feature_phase:
-            if fp in sentences.lower():
-                word_index_dict = {}
-                for fp_word in fp.split():
-                    print(fp_word)
-                    for sent in words_in_sentence:
-                        if fp_word in sent:
-                            # print(fp, sent.index(fp_word))
-                            word_index_dict[fp_word] = sent.index(fp_word)
-                print(sent_id, word_index_dict)
+    # for sent_id, review_id, sentences in sentences_list:
+    #     words_in_sentence.append((sentences.lower()).split())
 
+    for fp in feature_phase:
+        i = 0
+        for sent_id, review_id, sentences in sentences_list:
+            word_index_dict = {}
+            for fp_word in fp.split():
+                for index, word in enumerate(sentences.split()):
+                    if word == fp_word:
+                        word_index_dict[fp_word] = index
+            if len(word_index_dict) > 2:
+                listForm = list(word_index_dict.values())
+                previous_value = (listForm[0])
+                current_value = (listForm[1])
+                next_value = (listForm[2])
+                if current_value - previous_value < 3 and next_value - current_value < 3:
+                    i += 1
+            if len(word_index_dict) > 1:
+                listForm = list(word_index_dict.values())
+                previous_value = (listForm[0])
+                current_value = (listForm[1])
+                if current_value - previous_value < 3:
+                    i += 1
+
+            # Count how many times features appear in the sentence
+        if feature_count_in_dict.keys() != fp:
+            feature_count_in_dict[fp] = i
+
+    # print(feature_count_in_dict)
+    for key, value in feature_count_in_dict.items():
+        if value > 3:
+            feature_list_after_compactness_pruning.append(key)
+    return feature_list_after_compactness_pruning
+    # print(len(feature_list_after_compactness_pruning), feature_list_after_compactness_pruning)
+
+            # if fp in sentences.lower():
+            #     i +=1
+            #     word_index_dict = {}
+            #     for fp_word in fp.split():
+            #         index_count = 0
+            #         for index, word in enumerate(sentences.split()):
+            #             if word == fp_word:
+            #                 # print(sent_id, fp_word, index)
+            #                 word_index_dict[fp_word] = index
+            #         print(sent_id,len(word_index_dict),word_index_dict)
+            #     if len(word_index_dict) > 2:
+            #         listForm = list(word_index_dict.values())
+            #         previous_value = (listForm[0])
+            #         current_value = (listForm[1])
+            #         next_value = (listForm[2])
+            #         if(current_value - previous_value < 3 and next_value - current_value < 3):
+            #             print ("feature is compact")
+            #         if len(word_index_dict) > 1:
+            #             listForm = list(word_index_dict.values())
+            #             previous_value = (listForm[0])
+            #             current_value = (listForm[1])
+            #             if current_value - previous_value < 3:
+            #                 print("feature is compact")
+            #             else:
+            #                 print("feature is not compact")
+
+    # for sent_id, review_id, sentences in sentences_list:
+    #     words_in_sentence.append((sentences.lower()).split())
+    #     for fp in feature_phase:
+    #         # print(fp)
+    #         if fp in sentences.lower():
+    #             word_index_dict = {}
+    #             for fp_word in fp.split():
+    #                 # print(fp_word)
+    #                 for sent in words_in_sentence:
+    #                     if fp_word in sent:
+    #                         # print(fp, sent.index(fp_word))
+    #                         word_index_dict[fp_word] = sent.index(fp_word)
+    #             print(len(word_index_dict),word_index_dict)
+    #             if len(word_index_dict)>2:
+    #                 listForm = list(word_index_dict.values())
+    #                 previous_value = (listForm[0])
+    #                 current_value = (listForm[1])
+    #                 next_value = (listForm[2])
+    #                 if(current_value - previous_value < 3 and next_value - current_value < 3):
+    #                     print ("feature is compact")
+    #                     if feature_count_in_dict.keys() != fp:
+    #                         feature_count_in_dict[fp] = 1
+    #                     else:
+    #                         feature_count_in_dict[fp] += 1
+    #             if len(word_index_dict) > 1:
+    #                 listForm = list(word_index_dict.values())
+    #                 previous_value = (listForm[0])
+    #                 current_value = (listForm[1])
+    #                 if current_value - previous_value < 3:
+    #                     if feature_count_in_dict.keys() == fp:
+    #                         feature_count_in_dict[fp] += 1
+    #                     else:
+    #                         feature_count_in_dict[fp] = 1
+    #                 else:
+    #                     print('feature is not compact')
+    #     print(" feature count", feature_count_in_dict)
+
+                    # print("pre_value", previous_value, "current", current_value)
+                        # if value != '':
+                        #     if (prev_value):
+                        #         position = current - previeous
+                        #     else
+                        #         postion = cu
+                        # prev_position = value
+                    # if (pos == 'NN' or pos == 'NNP'):
+                    #     if (prev_tag == 'NN' or prev_tag == 'NNP'):
+                    #         curr_word = prev_word + ' ' + word
+                    #     else:
+                    #         noun_list.append(prev_word.lower())
+                    #         curr_word = word
+                    # prev_word = curr_word
+                    # prev_tag = pos
+                    #     print(sent_id, key, value)
+ # for each sentence in the review database:
+    #     if (a feature phrase found):
+    #         for each feature in the sentence :
+    #             Measure the distance between every two words;
+    #             if (words distance > 3)
+    #                 Remove the feature from the list;
 
 def redundancy_pruning():
     min_psupport_threshold = 4

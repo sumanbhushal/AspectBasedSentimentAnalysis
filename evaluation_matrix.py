@@ -79,6 +79,6 @@ def f_measure(precision_value, recall_value):
 
 
 def get_actual_aspect():
-    file = open(config.Output_file_path + "my_product_aspects_list_router.txt", "r").read()
+    file = open(config.Manual_labled_aspect_path + "product_aspects_Canon G3_ml.txt", "r").read()
     actual_product = file.split('\n')
     return actual_product

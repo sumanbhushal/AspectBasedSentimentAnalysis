@@ -36,12 +36,13 @@ def insert_sentence_into_sentence_table():
 
 
 def insert_sentence_query(review_id, sentence):
-    insert_value = (review_id, sentence)
-    insert_query = ("INSERT INTO sentences "
-                    "(review_id, sentence)"
-                    "VALUES (%s, %s)")
-    cursor.execute(insert_query, insert_value)
-    connection.commit()
+    if sentence != '':
+        insert_value = (review_id, sentence)
+        insert_query = ("INSERT INTO sentences "
+                        "(review_id, sentence)"
+                        "VALUES (%s, %s)")
+        cursor.execute(insert_query, insert_value)
+        connection.commit()
 
 
 def fetch_sentences_from_review(review):
@@ -90,8 +91,8 @@ def fetach_pos_tagged_sentence():
 
 
 def insert_candidate_aspect_into_db(candidate_aspects):
+    trucate_table('candidate_aspect_per_sentence')
     for review_id, sent_id, can_asp in candidate_aspects:
-
         if can_asp:
             candidate_asp = ''
             for cand_asp in can_asp:
@@ -114,7 +115,7 @@ def fetch_candidate_aspect_per_sentence():
     return cursor.fetchall()
 
 def insert_single_candidate_aspect_per_row(candidate_aspects):
-    # trucate_table('candidate_aspect')
+    trucate_table('candidate_aspect')
     for review_id, sent_id, can_asp in candidate_aspects:
         if can_asp:
             for cand_asp in can_asp:
@@ -135,6 +136,32 @@ def fetch_candidate_aspects_with_sentence_count():
     select_sql = 'SELECT count(*) as times, candidate_aspect FROM thesis.candidate_aspect group by candidate_aspect order by times desc;'
     cursor.execute(select_sql)
     return cursor.fetchall()
+
+def insert_frequent_1_itemsets(frequent_1_itemset):
+    trucate_table('frequent_itemsets')
+    for key, value in frequent_1_itemset.items():
+        insert_query = ("INSERT INTO frequent_itemsets "
+                        "(frequent_itemsets)"
+                        "VALUES (%s)")
+        cursor.execute(insert_query, key)
+    connection.commit()
+
+def insert_frequent_k_itemsets(frequent_itemset):
+    for L in frequent_itemset:
+        for key, value in frequent_itemset[L].items():
+            fq_item = str(key).strip('')
+            freq_item = eval(fq_item)
+            insert_value = ' '.join(freq_item)
+            insert_query = ("INSERT INTO frequent_itemsets "
+                            "(frequent_itemsets)"
+                            "VALUES (%s)")
+            cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+def fetch_frequent_itemsets():
+    select_sql = 'SELECT frequent_itemsets FROM thesis.frequent_itemsets;'
+    cursor.execute(select_sql)
+    return [x[0] for x in cursor.fetchall()]
 
 
 def insert_unigrams_into_db(review_id, sent_id, unigram_list):
