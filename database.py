@@ -36,13 +36,13 @@ def insert_sentence_into_sentence_table():
 
 
 def insert_sentence_query(review_id, sentence):
-    if sentence != '':
+    if sentence != ' ':
         insert_value = (review_id, sentence)
         insert_query = ("INSERT INTO sentences "
                         "(review_id, sentence)"
                         "VALUES (%s, %s)")
         cursor.execute(insert_query, insert_value)
-        connection.commit()
+    connection.commit()
 
 
 def fetch_sentences_from_review(review):
@@ -90,27 +90,21 @@ def fetach_pos_tagged_sentence():
     return pos_tagged_review
 
 
-def insert_candidate_aspect_into_db(candidate_aspects):
-    trucate_table('candidate_aspect_per_sentence')
-    for review_id, sent_id, can_asp in candidate_aspects:
-        if can_asp:
-            candidate_asp = ''
-            for cand_asp in can_asp:
-                if cand_asp != can_asp[-1]:
-                    candidate_asp += cand_asp + ','
-                else:
-                    candidate_asp += cand_asp
-
-            insert_value = (review_id, sent_id, candidate_asp)
-            insert_query = ("INSERT INTO candidate_aspect_per_sentence "
-                            "(review_id, sentence_id, candidate_aspects)"
-                            "VALUES (%s, %s, %s)")
-            cursor.execute(insert_query, insert_value)
+def insert_nouns_per_sentence_into_db(nouns_per_sent):
+    trucate_table('nouns_per_sentence')
+    for sent_id, review_id, noun_set in nouns_per_sent:
+        if noun_set != '':
+            for noun in noun_set:
+                insert_value = (review_id, sent_id, noun)
+                insert_query = ("INSERT INTO nouns_per_sentence "
+                                "(review_id, sentence_id, nouns)"
+                                "VALUES (%s, %s, %s)")
+                cursor.execute(insert_query, insert_value)
     connection.commit()
 
 
-def fetch_candidate_aspect_per_sentence():
-    select_sql = 'SELECT * from candidate_aspect_per_sentence'
+def fetch_nouns_per_sentence():
+    select_sql = 'SELECT * from nouns_per_sentence'
     cursor.execute(select_sql)
     return cursor.fetchall()
 
@@ -160,6 +154,21 @@ def insert_frequent_k_itemsets(frequent_itemset):
 
 def fetch_frequent_itemsets():
     select_sql = 'SELECT frequent_itemsets FROM thesis.frequent_itemsets;'
+    cursor.execute(select_sql)
+    return [x[0] for x in cursor.fetchall()]
+
+
+def insert_features_after_compactness_pruning(features_set):
+    trucate_table('pruning')
+    for feature in features_set:
+        insert_query = ("INSERT INTO pruning "
+                        "(candidate_features)"
+                        "VALUES (%s)")
+        cursor.execute(insert_query, feature)
+    connection.commit()
+
+def fetch_freatures_after_compactness_pruning():
+    select_sql = 'SELECT candidate_features FROM thesis.pruning;'
     cursor.execute(select_sql)
     return [x[0] for x in cursor.fetchall()]
 
@@ -237,8 +246,26 @@ def presence_of_aspect_in_sentence(candidate_aspect):
 
 def fetch_superset_with_sentence_count(aspect):
     cursor.callproc('superset_with_sentence_count', (aspect,))
-    return cursor.fetchall()
+    return [x[0] for x in cursor.fetchall()]
 
+def get_sentence_ids_for_term(t):
+    sql_query = "SELECT sentence_id FROM thesis.nouns_per_sentence where nouns = '" + t + "';"
+    cursor.execute(sql_query)
+    return [x[0] for x in cursor.fetchall()]
+
+def calcualte_psupport_for_term_with_superset(ids, term):
+    if len(ids)> 1:
+        ids_set = str(ids)
+    else:
+        ids_set = str("(" + ids[0] + ")")
+    sql_query = "SELECT count(*) FROM thesis.nouns_per_sentence where sentence_id not in " + ids_set + " and nouns = '" + term + "';"
+    cursor.execute(sql_query)
+    return cursor.fetchone()
+
+# def calcualte_psupport_for_term(term):
+#     sql_query = "SELECT count(*) FROM thesis.nouns_per_sentence where nouns = '" + term + "';"
+#     cursor.execute(sql_query)
+#     return [x[0] for x in cursor.fetchall()]
 
 # def test():
 #     candidate_aspect = fetch_candidate_aspect_db()
@@ -251,3 +278,5 @@ def fetch_superset_with_sentence_count(aspect):
 # test()
 # cursor.close()
 # connection.close()
+
+

@@ -1,4 +1,4 @@
-import nltk, re
+import nltk, re, pre_processing
 
 #Extraction Nouns from sentence
 def extract_nouns_from_standford_pos(pos_tagged_review):
@@ -59,14 +59,8 @@ def noun_chunking_for_stanford_pos(pos_tagged_text):
             combine_value = (review_id, sent_id, noun_list_per_sentence)
             noun_list_after_chunk.append(combine_value)
 
-
-    # Getting list of nouns with count (if necessary eliminating aspect which has 1 or less count)
-    for aspect in noun_list:
-        # if (noun_list.count(aspect) > 1):
-        if (noun_list_Dict.keys() != aspect):
-            noun_list_Dict[aspect] = noun_list.count(aspect)
-    outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    return noun_list_after_chunk
+    noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list_after_chunk)
+    return noun_list_without_stopwords
 
 #Chunking - to group JJ-NN/NNS
 def adj_noun_chunking_for_stanford_pos(pos_tagged_text):

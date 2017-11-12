@@ -15,18 +15,21 @@ def read_file():
 def main():
     review_list = read_file()
     # sentence_list = database.fetch_sentences_from_review(review_list)
-    # sentence_list = database.fetch_sentence_from_sentence_table()
+    sentence_list = database.fetch_sentence_from_sentence_table()
 
     ### Stanford POS tagging
     # pos_tagged_sentences_list = pos_tagging.stanford_pos_tagging(sentence_list)
     # database.insert_postagged_sent_into_db(pos_tagged_sentences_list)
-    # fetch_pos_tagged_sentences_list = database.fetach_pos_tagged_sentence()
+    fetch_pos_tagged_sentences_list = database.fetach_pos_tagged_sentence()
     # for pos_sent in pos_tagged_sentences_list:
     #     msc.write_to_file('stanford_pos_tagged_sentences.txt', str(pos_sent) + '\n')
 
 
     ### geting Nouns
-    # nouns_list = product_aspects_extraction.extract_nouns_from_standford_pos(fetch_pos_tagged_sentences_list)
+    nouns_list = product_aspects_extraction.extract_nouns_from_standford_pos(fetch_pos_tagged_sentences_list)
+    noun_list_per_sent = product_aspects_extraction.noun_chunking_for_stanford_pos(fetch_pos_tagged_sentences_list)
+    # database.insert_nouns_per_sentence_into_db(noun_list_per_sent)
+
     # Stopwords
     # noun_list_without_stopwords = pre_processing.filter_stopwords(nouns_list)
     # database.insert_candidate_aspect_into_db(noun_list_without_stopwords)
@@ -38,8 +41,8 @@ def main():
 
     ### Aspect Pruning
     product_aspect_after_compact_pruning = aspect_pruning.compactness_pruning()
-    # product_aspect_after_redundancy_pruning = aspect_pruning.redundancy_pruning()
-    print(product_aspect_after_compact_pruning)
+    # database.insert_features_after_compactness_pruning(product_aspect_after_compact_pruning)
+    product_aspect_after_redundancy_pruning = aspect_pruning.redundancy_pruning()
 
     # # Lemmatization
     # lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
@@ -89,8 +92,8 @@ def main():
 
 
     ### Evaluations
-    precision = evaluation_matrix.precision(product_aspect_after_compact_pruning)
-    recall = evaluation_matrix.recall(product_aspect_after_compact_pruning)
+    precision = evaluation_matrix.precision(product_aspect_after_redundancy_pruning)
+    recall = evaluation_matrix.recall(product_aspect_after_redundancy_pruning)
     f_measure = evaluation_matrix.f_measure(precision, recall)
 
     ### Extracting Opinion and Generating Opinion summary

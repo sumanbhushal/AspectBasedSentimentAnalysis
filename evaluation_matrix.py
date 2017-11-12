@@ -17,21 +17,21 @@ def precision(extracted_aspect_list):
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         extracted_aspect.append(aspect_replacing_space_with_underscore)
 
-    print(len(extracted_aspect),extracted_aspect)
-    print(len(actual_aspect),actual_aspect)
+    print("Extracted asepct", len(extracted_aspect),extracted_aspect)
+    print("Actual Aspect", len(actual_aspect),actual_aspect)
 
     ext_asp_intersection_actual = []
     for ex_asp in extracted_aspect:
         if ex_asp in actual_aspect:
             ext_asp_intersection_actual.append(ex_asp)
-    print(len(ext_asp_intersection_actual),ext_asp_intersection_actual)
+    print("Match Aspect",len(ext_asp_intersection_actual),ext_asp_intersection_actual)
     precision_value = len(ext_asp_intersection_actual) / len(extracted_aspect)
     print(precision_value)
     asp_ext_intersection_actual = []
     for asp in actual_aspect:
         if asp not in extracted_aspect:
             asp_ext_intersection_actual.append(asp)
-    print(len(asp_ext_intersection_actual), asp_ext_intersection_actual)
+    print("Not Match aspect", len(asp_ext_intersection_actual), asp_ext_intersection_actual)
     return precision_value
 
 
