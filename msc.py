@@ -3,7 +3,7 @@ import re, config, database
 
 
 def write_to_file(filename, output_content):
-    with open(config.Manual_labled_aspect_path + filename, 'a') as output:
+    with open(config.MANUAL_LABLED_ASPECT_PATH + filename, 'a') as output:
         for text in output_content:
             output.write(text)
 
@@ -83,7 +83,7 @@ def extract_manual_labeled_aspect(review):
 
 
 def extract_new_manual_labeled_aspect():
-    review = open(config.Output_file_path + "M_label Hitachi roter.txt", "r").read()
+    review = open(config.OUTPUT_FILE_PATH + "M_label Hitachi roter.txt", "r").read()
     product_aspect_list = []
     output_aspects = []
     aspect_dictionary = {}
@@ -137,7 +137,7 @@ def extract_new_manual_labeled_aspect():
 
 
 def generate_unique_list_of_manual_labeled_aspect(filename):
-    file = open(config.Output_file_path + filename + ".txt", "r").read()
+    file = open(config.OUTPUT_FILE_PATH + filename + ".txt", "r").read()
     manual_labeled_list = file.split('\n')
     unique_aspect_list = []
     for asp in manual_labeled_list:

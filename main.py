@@ -8,7 +8,7 @@ def read_file():
     Read file with review contents
     :return: content of file
     """
-    file = open(config.Datasets_path + "Canon G3.txt", "r").read()
+    file = open(config.DATASETS_PATH + "Canon G3.txt", "r").read()
     return file
 
 
@@ -31,9 +31,11 @@ def main():
     # database.insert_nouns_per_sentence_into_db(noun_list_per_sent)
 
     # Stopwords
-    # noun_list_without_stopwords = pre_processing.filter_stopwords(nouns_list)
+    noun_list_without_stopwords = pre_processing.filter_stopwords(nouns_list)
+    # print("Stop Words",len(noun_list_without_stopwords), noun_list_without_stopwords)
     # database.insert_candidate_aspect_into_db(noun_list_without_stopwords)
     # database.insert_single_candidate_aspect_per_row(noun_list_without_stopwords)
+
 
     # apriori algorithim for frequent itemsets
     # cbs_apriori.cbs_apriori_itemset()
@@ -43,10 +45,11 @@ def main():
     product_aspect_after_compact_pruning = aspect_pruning.compactness_pruning()
     # database.insert_features_after_compactness_pruning(product_aspect_after_compact_pruning)
     product_aspect_after_redundancy_pruning = aspect_pruning.redundancy_pruning()
+    print("After Pruning", len(product_aspect_after_redundancy_pruning), product_aspect_after_redundancy_pruning)
 
-    # # Lemmatization
-    # lemmatized = pre_processing.lemmatization(noun_list_without_stopwords)
-    # print(len(lemmatized), lemmatized)
+    # Lemmatization
+    lemmatized = pre_processing.lemmatization(product_aspect_after_redundancy_pruning)
+    print("Lemma", len(lemmatized), lemmatized)
     #
     # # Synonyms resolution
     # product_list = pre_processing.get_synonyms_set(lemmatized)
@@ -92,8 +95,8 @@ def main():
 
 
     ### Evaluations
-    precision = evaluation_matrix.precision(product_aspect_after_redundancy_pruning)
-    recall = evaluation_matrix.recall(product_aspect_after_redundancy_pruning)
+    precision = evaluation_matrix.precision(lemmatized)
+    recall = evaluation_matrix.recall(lemmatized)
     f_measure = evaluation_matrix.f_measure(precision, recall)
 
     ### Extracting Opinion and Generating Opinion summary

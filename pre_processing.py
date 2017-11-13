@@ -99,19 +99,14 @@ def lemmatization(product_aspect_list):
     :param product_aspect_list:
     :return: combination of product aspect that has the same meaning
     """
-    product_aspect_dictionary = {}
+    product_aspect_list_after_lemmatization = []
     lemmatizer = WordNetLemmatizer()
-    for lemma in product_aspect_list:
+    for words in product_aspect_list:
         # count=lemma[1]
-        lemma_word = lemmatizer.lemmatize(lemma[0])
-        if lemma_word in product_aspect_dictionary:
-            for key, value in product_aspect_dictionary.items():
-                product_aspect_dictionary[key] = value + lemma[1]
-        else:
-            product_aspect_dictionary[lemma_word] = lemma[1]
-
-    product_aspect = sorted(product_aspect_dictionary.items(), key=lambda x: x[1], reverse=True)
-    return product_aspect
+        lemma_word = lemmatizer.lemmatize(words)
+        if lemma_word not in product_aspect_list_after_lemmatization:
+            product_aspect_list_after_lemmatization.append(lemma_word)
+    return product_aspect_list_after_lemmatization
 
 
 def get_synonyms_set(noun_list):

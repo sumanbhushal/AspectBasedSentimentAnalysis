@@ -1,4 +1,5 @@
-import nltk, database
+import nltk, database, config
+from nltk import word_tokenize
 from nltk.corpus import wordnet
 from nltk.corpus import sentiwordnet
 
@@ -108,3 +109,81 @@ def generate_summary(feature, sentence_count, input_word):
 
     print("Feature = ", feature)
     print("total posts =", sentence_count, "\n" "positives =", pos, ", negatives =", neg, ", neutrals =", neu)
+
+def extract_opinion_of_aspect_using_lexicon():
+
+    positive_lexicon = read_lexicon(config.LEXICONS_PATH + "positive-words.txt")
+    negative_lexicon = read_lexicon(config.LEXICONS_PATH + "negative-words.txt")
+    features_list = ['lens', 'zoom', 'battery', 'pictures', 'canon', 'g3']
+
+    lex_list = []
+    for pos_lex in positive_lexicon:
+        lex_list.append(pos_lex)
+    for neg_lex in negative_lexicon:
+        lex_list.append(neg_lex)
+
+    sentence_in_reviews = database.fetach_pos_tagged_sentence()
+
+    subjective_sentence = []
+    for sent_id, review_id, sentences in sentence_in_reviews:
+        opinion_word_and_postion = []
+        feature_word_and_position = []
+        sentence = eval(sentences)
+        index = 0
+        for word, tag in sentence:
+            for lex_word in lex_list:
+                if word == lex_word:
+                    # sentences_with_feature.append(sentences)
+                    word_tag = (word, tag)
+                    word_index = (word, index)
+                    opinion_word_and_postion.append(word_index)
+                    # print(sent_id, pos_word, word_index, sentence)
+
+            for feature in features_list:
+                if feature == word:
+                    word_tag = (word, tag)
+                    feature_index = (feature, index)
+                    feature_word_and_position.append(feature_index)
+            index += 1
+
+        # for word, tag in sentence:
+        # get index of opinion word
+        # got idex of features in sentence
+        # if index of featrue is < index of opion_word
+        # if more than one, take the close feature
+        # If not present in backwards direction look at forward
+        if (opinion_word_and_postion):
+            # opinion_position = 0
+            # opinion_word = ''
+            # feature_word = ''
+            for o_word, o_index in opinion_word_and_postion:
+                # opinion_word = sentence[value]
+                opinion_position = o_index
+                opinion_word = o_word
+
+                if(feature_word_and_position):
+                    for p_word, p_index in feature_word_and_position:
+                        feature_position = p_index
+                        feature_word = p_word
+
+                        calculate_difference_in_distance = opinion_position - feature_position
+                        if feature_position < opinion_position and calculate_difference_in_distance <= 4:
+                            print("compare", sent_id, opinion_word,opinion_position, feature_word, feature_position)
+                            for i in range(calculate_difference_in_distance):
+                                ind_value = sentence[feature_position+i]
+                                print ("distance", ind_value)
+                            print("--------------------")
+                        elif feature_position > opinion_position:
+                            distance_difference = feature_position - opinion_position
+                            if(distance_difference < 2):
+                                print("Right to opinion", opinion_word,opinion_position, feature_word, feature_position)
+
+def read_lexicon(path):
+    lexicon = []
+
+    with open(path, 'r') as file:
+        for line in file:
+                lexicon.append(line.strip())
+    return lexicon
+
+extract_opinion_of_aspect_using_lexicon()
