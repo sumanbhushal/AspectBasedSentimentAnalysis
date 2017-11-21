@@ -239,16 +239,11 @@ def compare_opinion_syntax(noun_opinion):
 
 def genearte_summary_feature_opinion():
     # feature_opinion_sent_list = extract_opinion_of_aspect_using_lexicon()
-    # print(feature_opinion_sent_list)
     feature_opinion_sent_list = [('g3', 'worth', 'JJ', 14), ('zoom', 'nice', 'JJ', 53), ('battery', 'solid', 'JJ', 57),
-                                 ('pictures', 'easy', 'JJ', 61), ('zoom', 'works', 'VBZ', 63)]
-    pos, neg, neu = 0, 0, 0
+                                 ('pictures', 'easy', 'JJ', 61), ('zoom', 'works', 'VBZ', 63), ('zoom', 'bad', 'JJ', 163),
+                                 ('zoom', 'worse', 'JJ', 263), ('zoom', 'works', 'VBZ', 363), ('battery', 'nice', 'JJ', 157),
+                                 ('battery', 'best', 'JJ', 257)]
     feature_score_dict = {}
-    score = {}
-
-    # feature_score_dict['Score']['pos'] = 0
-    # feature_score_dict['Score']['neg'] = 0
-    # feature_score_dict['Score']['neu'] = 0
     for feature, opinion, o_tag, sent_id in feature_opinion_sent_list:
         opinion_tag = get_wordnet_pos(o_tag)
 
@@ -258,13 +253,12 @@ def genearte_summary_feature_opinion():
             feature_score_dict[feature] = {}
             feature_score_dict[feature]['Score'] = {}
             feature_score_dict[feature]['Sentence_id'] = {}
-            feature_score_dict[feature]['Score']['pos'] = []
-            feature_score_dict[feature]['Score']['neu'] = []
+            feature_score_dict[feature]['Score']['pos'] = 0
+            feature_score_dict[feature]['Score']['neg'] = 0
+            feature_score_dict[feature]['Score']['neu'] = 0
             feature_score_dict[feature]['Sentence_id']['pos_id'] = []
+            feature_score_dict[feature]['Sentence_id']['neg_id'] = []
             feature_score_dict[feature]['Sentence_id']['neu_id'] = []
-
-        sentence_id = []
-        score_list = []
 
         tag_synset_name = []
         for i in syns:
@@ -272,29 +266,27 @@ def genearte_summary_feature_opinion():
                 synset_name = i.name()
                 tag_synset_name.append(synset_name)
                 # synset_name = i.name().split('.')[0] + '.' + opinion_tag + '.01'
-                # print(synset_name)
             elif i.pos() in ['s']:
                 tag_synset_name.append(i.name())
 
         if (len(tag_synset_name) != 0):
+            pos, neg, neu = 0, 0, 0
+            sentence_id = []
             each_word_orientation = sentiwordnet.senti_synset(tag_synset_name[0])
-            print(feature, opinion, "Positive Score: ", each_word_orientation.pos_score(), "Negative Score: ",
-                  each_word_orientation.neg_score())
+            # print(feature, each_word_orientation, sent_id)
             if each_word_orientation.pos_score() != 0 and each_word_orientation.neg_score() == 0:
                 for f_key, f_value in feature_score_dict[feature].items():
 
                     if f_key == 'Score':
                         for score_key, score_value in f_value.items():
-                            print("Finding score ", score_key, score_value)
                             if score_key == 'pos':
                                 if score_value:
-                                    score_list = score_value
-                                    score_list.append(each_word_orientation.pos_score())
+                                    pos = score_value
+                                    pos += 1
                                 else:
-                                    score_list.append(each_word_orientation.pos_score())
+                                    pos += 1
                     if f_key == 'Sentence_id':
                         for s_key, s_value in f_value.items():
-                            print("Finding sentence id ", s_key, s_value, sent_id)
                             if s_key == 'pos_id':
                                 if s_value:
                                     sentence_id = s_value
@@ -302,17 +294,39 @@ def genearte_summary_feature_opinion():
                                     sentence_id.append(sent_id)
                                     break
                                 else:
-                                    print("sent id", sent_id)
                                     sentence_id.append(sent_id)
 
-                feature_score_dict[feature]['Score']['pos'] = score_list
+                feature_score_dict[feature]['Score']['pos'] = pos
                 feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+            # For Negative
+            elif each_word_orientation.neg_score() != 0 and each_word_orientation.pos_score() == 0:
+                for f_key, f_value in feature_score_dict[feature].items():
+                    if f_key == 'Score':
+                        for score_key, score_value in f_value.items():
+                            if score_key == 'neg':
+                                if score_value:
+                                    neg = score_value
+                                    neg += 1
+                                else:
+                                    neg += 1
+                    if f_key == 'Sentence_id':
+                        for s_key, s_value in f_value.items():
+                            if s_key == 'neg_id':
+                                if s_value:
+                                    sentence_id = s_value
+                                    # sentence_id = list(str(s_value).split(','))
+                                    sentence_id.append(sent_id)
+                                    break
+                                else:
+                                    sentence_id.append(sent_id)
+
+                feature_score_dict[feature]['Score']['neg'] = neg
+                feature_score_dict[feature]['Sentence_id']['neg_id'] = sentence_id
             # For neutral
             elif each_word_orientation.pos_score() == 0 and each_word_orientation.neg_score() == 0:
                 for f_key, f_value in feature_score_dict[feature].items():
                     if f_key == 'Score':
                         for score_key, score_value in f_value.items():
-                            print("Finding score ", score_key, score_value)
                             if score_key == 'neu':
                                 if score_value:
                                     neu = score_value
@@ -321,7 +335,6 @@ def genearte_summary_feature_opinion():
                                     neu += 1
                     if f_key == 'Sentence_id':
                         for s_key, s_value in f_value.items():
-                            print("Finding sentence id ", s_key, s_value, sent_id)
                             if s_key == 'neu_id':
                                 if s_value:
                                     sentence_id = s_value
@@ -329,92 +342,113 @@ def genearte_summary_feature_opinion():
                                     sentence_id.append(sent_id)
                                     break
                                 else:
-                                    print("sent id", sent_id)
                                     sentence_id.append(sent_id)
 
                 feature_score_dict[feature]['Score']['neu'] = neu
                 feature_score_dict[feature]['Sentence_id']['neu_id'] = sentence_id
-            # elif each_word_orientation.neg_score() != 0 and each_word_orientation.pos_score() == 0:
-            #     # opinion_orientation_of_feature -= each_word_orientation.neg_score()
-            #     neg += 1
-            # elif each_word_orientation.pos_score()  != 0 and each_word_orientation.neg_score() != 0:
-            #     if(each_word_orientation.pos_score - each_word_orientation.neg_score() > 0):
-            #         pos +=1
-            #     else:
-            #         neg += 1
-            # else:
-            #     neu += 1
+            # For both positive and negative value
+            elif each_word_orientation.pos_score() != 0 and each_word_orientation.neg_score() != 0:
+                if each_word_orientation.pos_score() - each_word_orientation.neg_score() > 0:
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'pos':
+                                    if score_value:
+                                        pos = score_value
+                                        pos += 1
+                                    else:
+                                        pos += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'pos_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
 
-        #     for f_key, f_value in feature_score_dict[feature].items():
-        #         print("before", f_key, f_value)
-        #         if f_key == 'Score':
-        #             for score_key, score_value in f_value.items():
-        #                 if score_value:
-        #                     score_list = score_value
-        #                     score_list.append(each_word_orientation.pos_score())
-        #                 else:
-        #                     score_list.append(each_word_orientation.pos_score())
-        #         if f_key == 'Sentence_id':
-        #             for s_key, s_value in f_value.items():
-        #                 if s_value:
-        #                     sentence_id = s_value
-        #                     # sentence_id = list(str(s_value).split(','))
-        #                     sentence_id.append(sent_id)
-        #                     break
-        #                 else:
-        #                     sentence_id.append(sent_id)
-        #
-        # feature_score_dict[feature]['Score']['pos'] = score_list
-        # feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+                    feature_score_dict[feature]['Score']['pos'] = pos
+                    feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+                elif each_word_orientation.neg_score() - each_word_orientation.pos_score() > 0:
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'neg':
+                                    if score_value:
+                                        neg = score_value
+                                        neg += 1
+                                    else:
+                                        neg += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'neg_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
+
+                    feature_score_dict[feature]['Score']['neg'] = neg
+                    feature_score_dict[feature]['Sentence_id']['neg_id'] = sentence_id
+                elif each_word_orientation.pos_score() - each_word_orientation.neg_score() == 0 :
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'neu':
+                                    if score_value:
+                                        neu = score_value
+                                        neu += 1
+                                    else:
+                                        neu += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'neu_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
+
+                    feature_score_dict[feature]['Score']['neu'] = neu
+                    feature_score_dict[feature]['Sentence_id']['neu_id'] = sentence_id
+
+    print(feature_score_dict)
+    for feature_key, feature_values in feature_score_dict.items():
+        pos, neg, neu = 0,0,0
+        pos_sentences = []
+        neg_sentences = []
+        neu_sentences = []
+        # print(feature_key, feature_values)
+        for s_key, s_value in feature_values.items():
+            # print(s_key, s_value)
+            if s_key == 'Score':
+                for score_key, score_value in s_value.items():
+                    if score_key == 'pos':
+                        pos = score_value
+                    if score_key == 'neg':
+                        neg = score_value
+                    if score_key == 'neu':
+                        neu = score_value
+            if s_key == 'Sentence_id':
+                for sent_id_key, sent_id_value in s_value.items():
+                    if sent_id_key == 'pos_id':
+                        pos_sentences = sent_id_value
+                    if sent_id_key == 'neg_id':
+                        neg_sentences = sent_id_value
+                    if sent_id_key == 'neu_id':
+                        neu_sentences = sent_id_value
 
 
-        print(feature_score_dict)
-        print('------------------')
-
-
-        # if (len(syns) != 0):
-        #     word = syns[0].name()
-        #     each_word_orientation = sentiwordnet.senti_synset(word)
-        #     print(feature, opinion, each_word_orientation)
-        #     if each_word_orientation.pos_score() != 0:
-        #         pass
-        #
-        #         # print("Score = ", feature_score_dict)
-        #     feature_score_dict[feature]['Sentence_id'].append(sent_id)
-        # print(feature, "Sentence = ", feature_score_dict[feature]['Sentence_id'])
-        # print("Feature = ", feature_score_dict[feature])
-
-
-
-
-
-        #         if each_word_orientation.pos_score() - each_word_orientation.neg_score() > 0:
-        #             # new_value = 0
-        #             print(feature, feature_score_dict[feature]['Score']['pos'])
-        #             if(feature_score_dict[feature]['Score']['pos']!= ''):
-        #                 feature_score_dict[feature]['Score']['pos'] = 1
-        #             else:
-        #                 previou_value = feature_score_dict[feature]['Score']['pos']
-        #                 new_value = previou_value + 1
-        #                 feature_score_dict[feature]['Score']['pos'] = new_value
-        #             print(feature, feature_score_dict[feature]['Score']['pos'])
-        #             # feature_score_dict[feature]['Score']['pos'] += 1
-        #             # pos += 1
-        #             # feature_score_dict[feature]['Sentence_id'].append(sent_id)
-        #         else:
-        #             neg += 1
-        #             # feature_score_dict[feature]['Sentence_id'].append(sent_id)
-        #     elif each_word_orientation.neg_score() != 0:
-        #         neg += 1
-        #         # feature_score_dict[feature]['Sentence_id'].append(sent_id)
-        #     else:
-        #         neu += 1
-        # feature_score_dict[feature]['Sentence_id'].append(sent_id)
-
-                # feature_score_dict[feature]['Score'] = {feature_score_dict[feature]['Score']['pos']}
-            # feature_score_dict[feature]['Score'] = {'pos': pos, 'neg': neg, 'neu':neu}
-
-    # print("positives =", pos, ", negatives =", neg, ", neutrals =", neu)
+        print("Feature = ", feature_key, "Positive = ", pos, "Negative = ", neg, "Neutral = ", neu,
+              "Positive Sentence ", pos_sentences,
+              "Negative sentence ", neg_sentences,
+              "Neutral Sentence ", neu_sentences)
 
 
 def get_wordnet_pos(opinion_tag):
@@ -429,4 +463,40 @@ def get_wordnet_pos(opinion_tag):
         return 'r'
     else:
         return None
-genearte_summary_feature_opinion()
+
+def plot_in_graph():
+    feature_score_dict = {'g3': {'Score': {'pos': 1, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [14], 'neg_id': [], 'neu_id': []}},
+               'zoom': {'Score': {'pos': 1, 'neg': 2, 'neu': 2}, 'Sentence_id': {'pos_id': [53], 'neg_id': [163, 263], 'neu_id': [63, 363]}},
+               'battery': {'Score': {'pos': 3, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [57, 157, 257], 'neg_id': [], 'neu_id': []}},
+               'pictures': {'Score': {'pos': 1, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [61], 'neg_id': [], 'neu_id': []}}}
+
+    for feature_key, feature_values in feature_score_dict.items():
+        pos, neg, neu = 0,0,0
+        pos_sentences = []
+        neg_sentences = []
+        neu_sentences = []
+        # print(feature_key, feature_values)
+        for s_key, s_value in feature_values.items():
+            # print(s_key, s_value)
+            if s_key == 'Score':
+                for score_key, score_value in s_value.items():
+                    if score_key == 'pos':
+                        pos = score_value
+                    if score_key == 'neg':
+                        neg = score_value
+                    if score_key == 'neu':
+                        neu = score_value
+            if s_key == 'Sentence_id':
+                for sent_id_key, sent_id_value in s_value.items():
+                    if sent_id_key == 'pos_id':
+                        pos_sentences = sent_id_value
+                    if sent_id_key == 'neg_id':
+                        neg_sentences = sent_id_value
+                    if sent_id_key == 'neu_id':
+                        neu_sentences = sent_id_value
+
+        print("Feature = ", feature_key, "Positive = ", pos, "Negative = ", neg, "Neutral = ", neu,
+              "Positive Sentence ", pos_sentences,
+              "Negative sentence ", neg_sentences,
+              "Neutral Sentence ", neu_sentences)
+plot_in_graph()
