@@ -56,9 +56,7 @@ def fetch_sentences_from_review(review):
             insert_into_review_table(filter_symbol_rw)
 
     insert_sentence_into_sentence_table()
-    select_sql = 'SELECT * from sentences'
-    cursor.execute(select_sql)
-    return cursor.fetchall()
+    return fetch_sentence_from_sentence_table()
 
 
 def fetch_sentence_from_sentence_table():
@@ -90,21 +88,49 @@ def fetach_pos_tagged_sentence():
     return pos_tagged_review
 
 
-def insert_nouns_per_sentence_into_db(nouns_per_sent):
-    trucate_table('nouns_per_sentence')
+def insert_nouns_chunks_per_sentence_into_db(nouns_per_sent):
+    trucate_table('nouns_chunks_per_sentence')
     for sent_id, review_id, noun_set in nouns_per_sent:
         if noun_set != '':
+            nouns_in_sent = ''
+            index = 0
             for noun in noun_set:
-                insert_value = (review_id, sent_id, noun)
-                insert_query = ("INSERT INTO nouns_per_sentence "
-                                "(review_id, sentence_id, nouns)"
-                                "VALUES (%s, %s, %s)")
-                cursor.execute(insert_query, insert_value)
+                if index != len(noun_set)-1:
+                    nouns_in_sent += noun + ','
+                    index += 1
+                else:
+                    nouns_in_sent += noun
+
+            insert_value = (review_id, sent_id, nouns_in_sent)
+            insert_query = ("INSERT INTO nouns_chunks_per_sentence "
+                            "(review_id, sentence_id, nouns)"
+                            "VALUES (%s, %s, %s)")
+            cursor.execute(insert_query, insert_value)
+    connection.commit()
+
+def insert_nouns_list_per_sentence_into_db(nouns_per_sent):
+    trucate_table('nouns_list_per_sentence')
+    for sent_id, review_id, noun_set in nouns_per_sent:
+        if noun_set != '':
+            nouns_in_sent = ''
+            index = 0
+            for noun in noun_set:
+                if index != len(noun_set)-1:
+                    nouns_in_sent += noun + ','
+                    index += 1
+                else:
+                    nouns_in_sent += noun
+
+            insert_value = (review_id, sent_id, nouns_in_sent)
+            insert_query = ("INSERT INTO nouns_list_per_sentence "
+                            "(review_id, sentence_id, nouns)"
+                            "VALUES (%s, %s, %s)")
+            cursor.execute(insert_query, insert_value)
     connection.commit()
 
 
 def fetch_nouns_per_sentence():
-    select_sql = 'SELECT * from nouns_per_sentence'
+    select_sql = 'SELECT * from nouns_list_per_sentence'
     cursor.execute(select_sql)
     return cursor.fetchall()
 
@@ -120,6 +146,17 @@ def insert_single_candidate_aspect_per_row(candidate_aspects):
                 cursor.execute(insert_query, insert_value)
     connection.commit()
 
+def insert_single_noun_chunk_per_row(candidate_aspects):
+    trucate_table('noun_chunks_per_row')
+    for review_id, sent_id, can_asp in candidate_aspects:
+        if can_asp:
+            for cand_asp in can_asp:
+                insert_value = (review_id, sent_id, cand_asp)
+                insert_query = ("INSERT INTO noun_chunks_per_row "
+                                "(review_id, sentence_id, noun)"
+                                "VALUES (%s, %s, %s)")
+                cursor.execute(insert_query, insert_value)
+    connection.commit()
 
 def fetch_candidate_aspects():
     select_sql = 'SELECT * from candidate_aspect'
@@ -141,12 +178,13 @@ def insert_frequent_1_itemsets(frequent_1_itemset):
     connection.commit()
 
 def insert_frequent_k_itemsets(frequent_itemset):
+    trucate_table('frequent_itemsets_k')
     for L in frequent_itemset:
         for key, value in frequent_itemset[L].items():
             fq_item = str(key).strip('')
             freq_item = eval(fq_item)
             insert_value = ' '.join(freq_item)
-            insert_query = ("INSERT INTO frequent_itemsets "
+            insert_query = ("INSERT INTO frequent_itemsets_k "
                             "(frequent_itemsets)"
                             "VALUES (%s)")
             cursor.execute(insert_query, insert_value)
@@ -157,6 +195,24 @@ def fetch_frequent_itemsets():
     cursor.execute(select_sql)
     return [x[0] for x in cursor.fetchall()]
 
+def fetch_frequent_1_itemsets():
+    select_sql = 'SELECT frequent_itemsets FROM thesis.frequent_itemsets_k;'
+    cursor.execute(select_sql)
+    return [x[0] for x in cursor.fetchall()]
+
+def insert_final_candidate_aspects(frequent_itemset):
+    trucate_table('candidate_aspects_final')
+    for cand_item in frequent_itemset:
+        insert_query = ("INSERT INTO candidate_aspects_final "
+                        "(aspect)"
+                        "VALUES (%s)")
+        cursor.execute(insert_query, cand_item)
+    connection.commit()
+
+def fetch_final_candidate_aspects():
+    select_sql = 'SELECT aspect FROM thesis.candidate_aspects_final;'
+    cursor.execute(select_sql)
+    return [x[0] for x in cursor.fetchall()]
 
 def insert_features_after_compactness_pruning(features_set):
     trucate_table('pruning')
@@ -172,6 +228,11 @@ def fetch_freatures_after_compactness_pruning():
     cursor.execute(select_sql)
     return [x[0] for x in cursor.fetchall()]
 
+def fetch_feature_for_wikipedia_crawl():
+    select_sql = 'SELECT count(*) as ct, nouns FROM thesis.nouns_per_sentence group by nouns order by ct desc;'
+    cursor.execute(select_sql)
+    entity = cursor.fetchone()
+    return entity[1]
 
 def insert_unigrams_into_db(review_id, sent_id, unigram_list):
     for unigram in unigram_list:
@@ -249,7 +310,7 @@ def fetch_superset_with_sentence_count(aspect):
     return [x[0] for x in cursor.fetchall()]
 
 def get_sentence_ids_for_term(t):
-    sql_query = "SELECT sentence_id FROM thesis.nouns_per_sentence where nouns = '" + t + "';"
+    sql_query = "SELECT sentence_id FROM thesis.noun_chunks_per_row where noun = '" + t + "';"
     cursor.execute(sql_query)
     return [x[0] for x in cursor.fetchall()]
 
@@ -258,7 +319,7 @@ def calcualte_psupport_for_term_with_superset(ids, term):
         ids_set = str(ids)
     else:
         ids_set = str("(" + ids[0] + ")")
-    sql_query = "SELECT count(*) FROM thesis.nouns_per_sentence where sentence_id not in " + ids_set + " and nouns = '" + term + "';"
+    sql_query = "SELECT count(*) FROM thesis.noun_chunks_per_row where sentence_id not in " + ids_set + " and noun = '" + term + "';"
     cursor.execute(sql_query)
     return cursor.fetchone()
 

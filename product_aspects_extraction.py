@@ -17,26 +17,6 @@ def extract_nouns_from_standford_pos(pos_tagged_review):
 
 
 #Chunking - to group NN/NNS
-def noun_chunking(pos_tagged_text):
-    """
-    Creating chunk regular expression to get the nouns and nouns phrase
-    :param pos_tagged_text:
-    :return:
-    """
-    noun_list_after_chunk = []
-    chunkRegExpress = r"""ProductAspect: {<NN.*>+}"""
-    chunkParsar = nltk.RegexpParser(chunkRegExpress)
-    for review_id, sent_id, pos_tagged_content in pos_tagged_text:
-        chunked = chunkParsar.parse(pos_tagged_content)
-        noun_list_per_sentence=[]
-        for subtree in chunked.subtrees(filter=lambda chunk_label: chunk_label.label() == 'ProductAspect'):
-
-            noun_list_per_sentence.append(" ".join(word for word, pos in subtree.leaves()).lower())
-        combine_value = (review_id, sent_id, noun_list_per_sentence)
-        noun_list_after_chunk.append(combine_value)
-    return noun_list_after_chunk
-
-#Chunking - to group NN/NNS
 def noun_chunking_for_stanford_pos(pos_tagged_text):
     """
     Creating chunk regular expression to get the nouns and nouns phrase
@@ -61,6 +41,7 @@ def noun_chunking_for_stanford_pos(pos_tagged_text):
 
     noun_list_without_stopwords = pre_processing.filter_stopwords(noun_list_after_chunk)
     return noun_list_without_stopwords
+
 
 #Chunking - to group JJ-NN/NNS
 def adj_noun_chunking_for_stanford_pos(pos_tagged_text):
@@ -87,13 +68,7 @@ def adj_noun_chunking_for_stanford_pos(pos_tagged_text):
         combine_value = (review_id, sent_id, adj_noun_list_per_sentence)
         adj_noun_list_after_chunk.append(combine_value)
 
-    # Getting list of nouns with count (if necessary eliminating aspect which has 1 or less count)
-    # for aspect in adj_noun_list:
-    #     # if (adj_noun_list.count(aspect) > 1):
-    #     if (noun_list_Dict.keys() != aspect):
-    #         noun_list_Dict[aspect] = adj_noun_list.count(aspect)
-    # outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    # print(len(outputAspect),outputAspect)
+
     return adj_noun_list_after_chunk
 
 # Chunking - JJ (adjective as feaatures)
@@ -119,13 +94,6 @@ def adj_chunking_for_stanford_pos(pos_tagged_text):
         combine_value = (review_id, sent_id, noun_list_per_sentence)
         adjective_list_after_chunk.append(combine_value)
 
-    # Getting list of nouns with count (if necessary eliminating aspect which has 1 or less count)
-    # for aspect in adjective_list:
-    #     # if (adjective_list.count(aspect) > 1):
-    #     if (adjective_list_Dict.keys() != aspect):
-    #         adjective_list_Dict[aspect] = adjective_list.count(aspect)
-    # outputAspect = sorted(adjective_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    # print(len(outputAspect),outputAspect)
     return adjective_list_after_chunk
 
 
@@ -209,65 +177,3 @@ def extract_aspect_from_opinion(pos_tagged_sentences):
                     if distance == min_distance:
                         product_aspect.append(nn)
     print(len(product_aspect), product_aspect)
-
-
-#Extraction Noun from sentence
-def extract_noun(pos_tagged_review):
-    prev_word = ''
-    prev_tag = ''
-    curr_word = ''
-    noun_list = []
-    noun_list_Dict = {}
-    # Extracting Aspects
-    for review_id, sent_id, pos_tagged_content in pos_tagged_review:
-        print(pos_tagged_content)
-        for word, pos in pos_tagged_content:
-            if (pos == 'NN' or pos == 'NNP'):
-                if (prev_tag == 'NN' or prev_tag == 'NNP'):
-                    curr_word = prev_word + ' ' + word
-                else:
-                    noun_list.append(prev_word.lower())
-                    curr_word = word
-            prev_word = curr_word
-            prev_tag = pos
-
-    # Eliminating aspect which has 1 or less count
-    for aspect in noun_list:
-        if (noun_list.count(aspect) > 1):
-            if (noun_list_Dict.keys() != aspect):
-                noun_list_Dict[aspect] = noun_list.count(aspect)
-    outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-    # print(len(outputAspect), outputAspect)
-    return outputAspect
-
-#Extraction Noun from sentence
-# def extract_noun_from_standford_pos(pos_tagged_review):
-#     prev_word = ''
-#     prev_tag = ''
-#     curr_word = ''
-#     noun_list = []
-#     noun_list_Dict = {}
-#     # Extracting Aspects
-#     for review_id, sent_id, pos_tagged_content in pos_tagged_review:
-#         pos_list = eval(pos_tagged_content)
-#         for word, pos in pos_list:
-#             if (pos == 'NN' or pos == 'NNP'):
-#                 if (prev_tag == 'NN' or prev_tag == 'NNP'):
-#                     curr_word = prev_word + ' ' + word
-#                 else:
-#                     noun_list.append(prev_word.lower())
-#                     curr_word = word
-#             prev_word = curr_word
-#             prev_tag = pos
-#
-#     # Eliminating aspect which has 1 or less count
-#     for aspect in noun_list:
-#         # if (noun_list.count(aspect) > 1):
-#         if (noun_list_Dict.keys() != aspect):
-#             noun_list_Dict[aspect] = noun_list.count(aspect)
-#     outputAspect = sorted(noun_list_Dict.items(), key=lambda x: x[1], reverse=True)
-#     # print(len(outputAspect), outputAspect)
-#     return outputAspect
-
-
-

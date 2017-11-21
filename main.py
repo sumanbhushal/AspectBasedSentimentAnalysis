@@ -1,6 +1,6 @@
 import config, database, product_aspects_extraction, pre_processing, opinion_extraction, msc, pos_tagging, \
-    aspect_pruning, n_grams, StanfordNLPServer, cbs_apriori
-import nltk
+    aspect_pruning, n_grams, StanfordNLPServer, cbs_apriori, wikipedia_crawler
+import nltk, re
 import evaluation_matrix
 
 def read_file():
@@ -27,19 +27,24 @@ def main():
 
     ### geting Nouns
     nouns_list = product_aspects_extraction.extract_nouns_from_standford_pos(fetch_pos_tagged_sentences_list)
-    noun_list_per_sent = product_aspects_extraction.noun_chunking_for_stanford_pos(fetch_pos_tagged_sentences_list)
-    # database.insert_nouns_per_sentence_into_db(noun_list_per_sent)
+    noun_chunk_per_sent = product_aspects_extraction.noun_chunking_for_stanford_pos(fetch_pos_tagged_sentences_list)
+
 
     # Stopwords
-    noun_list_without_stopwords = pre_processing.filter_stopwords(nouns_list)
+    noun_list_without_stopwords = pre_processing.filter_stopwords(noun_chunk_per_sent)
     # print("Stop Words",len(noun_list_without_stopwords), noun_list_without_stopwords)
-    # database.insert_candidate_aspect_into_db(noun_list_without_stopwords)
-    # database.insert_single_candidate_aspect_per_row(noun_list_without_stopwords)
 
+    # insert noun list and noun_chunk per sentence
+    # database.insert_nouns_chunks_per_sentence_into_db(noun_list_without_stopwords)
+    # database.insert_nouns_list_per_sentence_into_db(noun_list_without_stopwords)
+
+    # database.insert_single_candidate_aspect_per_row(noun_list_without_stopwords)
+    database.insert_single_noun_chunk_per_row(noun_list_without_stopwords)
 
     # apriori algorithim for frequent itemsets
     # cbs_apriori.cbs_apriori_itemset()
-    frequent_itemsets = database.fetch_frequent_itemsets()
+    frequent_itemsets = cbs_apriori.frequent_itemset_from_db()
+    print(len(frequent_itemsets), frequent_itemsets)
 
     ### Aspect Pruning
     product_aspect_after_compact_pruning = aspect_pruning.compactness_pruning()
@@ -50,7 +55,23 @@ def main():
     # Lemmatization
     lemmatized = pre_processing.lemmatization(product_aspect_after_redundancy_pruning)
     print("Lemma", len(lemmatized), lemmatized)
+
+    #wikipedia Crawler
+    # entity_name = database.fetch_feature_for_wikipedia_crawl()
+    # print("wikipedia", entity_name)
+    # wiki_list = wikipedia_crawler.wiki_crawler()
+    # print("wiki", len(wiki_list), wiki_list)
     #
+    # exp_asp_intersection_wiki = []
+    # match_with_wiki_dict = {}
+    # for asp in lemmatized:
+    #     for s in filter(lambda x: asp in x, wiki_list):
+    #         exp_asp_intersection_wiki.append(asp)
+    # for asp in exp_asp_intersection_wiki:
+    #     if (match_with_wiki_dict.keys()!= asp):
+    #         match_with_wiki_dict[asp] = exp_asp_intersection_wiki.count(asp)
+    # print("Match from Wiki", len(match_with_wiki_dict), match_with_wiki_dict)
+
     # # Synonyms resolution
     # product_list = pre_processing.get_synonyms_set(lemmatized)
     # # print(len(product_list), product_list)
@@ -66,8 +87,6 @@ def main():
     # print(len(verb_noun), verb_noun)
 
 
-
-
     ### ngrams
     # n_grams.generate_unigram(word_tokenize_review_list)
     # n_grams.evaluation_matrix_with_unigram()
@@ -76,18 +95,6 @@ def main():
     # msc.generate_tigram(word_tokenize_review_list)
     # msc.generate_quadgram(word_tokenize_review_list)
     # msc.generate_pentagram(word_tokenize_review_list)
-
-    ### Chunking
-    #noun_list_with_chunking= product_aspects_extraction.noun_chunking(pos_tagged_sentences_list)
-    # database.insert_candidate_aspect_into_db(noun_list_with_chunking)
-
-    # Get candidate aspect from database
-    # candidate_aspect_list = database.fetch_candidate_aspects_with_sentence_count()
-    # print(candidate_aspect_list)
-
-    ### Aspect Pruning
-    # product_aspect_after_redundancy_pruning = aspect_pruning.redundancy_pruning()
-    # print(product_aspect_after_redundancy_pruning)
 
     ### Extract Manual labeled aspect and write to file
     # manual_labeled_product_aspect = msc.extract_manual_labeled_aspect(review_list)

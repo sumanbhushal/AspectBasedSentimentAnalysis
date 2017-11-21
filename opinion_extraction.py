@@ -2,6 +2,7 @@ import nltk, database, config
 from nltk import word_tokenize
 from nltk.corpus import wordnet
 from nltk.corpus import sentiwordnet
+from collections import defaultdict
 
 
 def extract_opinon_of_feature(pos_tagged_sentence_list):
@@ -123,8 +124,8 @@ def extract_opinion_of_aspect_using_lexicon():
         lex_list.append(neg_lex)
 
     sentence_in_reviews = database.fetach_pos_tagged_sentence()
+    sentence_containing_feature_opinion = []
 
-    subjective_sentence = []
     for sent_id, review_id, sentences in sentence_in_reviews:
         opinion_word_and_postion = []
         feature_word_and_position = []
@@ -135,15 +136,15 @@ def extract_opinion_of_aspect_using_lexicon():
                 if word == lex_word:
                     # sentences_with_feature.append(sentences)
                     word_tag = (word, tag)
-                    word_index = (word, index)
-                    opinion_word_and_postion.append(word_index)
-                    # print(sent_id, pos_word, word_index, sentence)
+                    word_tag_index = (word, tag, index)
+                    opinion_word_and_postion.append(word_tag_index)
+                    # print(sent_id, lex_word, word_index, sentence)
 
             for feature in features_list:
                 if feature == word:
                     word_tag = (word, tag)
-                    feature_index = (feature, index)
-                    feature_word_and_position.append(feature_index)
+                    feature_tag_index = (feature, tag, index)
+                    feature_word_and_position.append(feature_tag_index)
             index += 1
 
         # for word, tag in sentence:
@@ -153,30 +154,45 @@ def extract_opinion_of_aspect_using_lexicon():
         # if more than one, take the close feature
         # If not present in backwards direction look at forward
         if (opinion_word_and_postion):
-            # opinion_position = 0
-            # opinion_word = ''
-            # feature_word = ''
-            for o_word, o_index in opinion_word_and_postion:
-                # opinion_word = sentence[value]
+            for o_word, o_tag, o_index in opinion_word_and_postion:
                 opinion_position = o_index
                 opinion_word = o_word
 
                 if(feature_word_and_position):
-                    for p_word, p_index in feature_word_and_position:
+                    for p_word, p_tag, p_index in feature_word_and_position:
                         feature_position = p_index
                         feature_word = p_word
 
                         calculate_difference_in_distance = opinion_position - feature_position
+                        end_element = calculate_difference_in_distance + 1
+                        subjective_sentence = []
                         if feature_position < opinion_position and calculate_difference_in_distance <= 4:
-                            print("compare", sent_id, opinion_word,opinion_position, feature_word, feature_position)
-                            for i in range(calculate_difference_in_distance):
+                            # print("compare", sent_id, opinion_word,opinion_position, feature_word, feature_position)
+                            for i in range(end_element):
                                 ind_value = sentence[feature_position+i]
-                                print ("distance", ind_value)
-                            print("--------------------")
+                                subjective_sentence.append(ind_value)
+                                # print(sent_id, "distance", ind_value)
+                            # print("----------------")
+                            sent_in_freq_tag = compare_opinion_syntax(subjective_sentence)
+                            if (sent_in_freq_tag == True):
+                                feature_opinion_sent = (feature_word, opinion_word, o_tag, sent_id)
+                                sentence_containing_feature_opinion.append(feature_opinion_sent)
+
                         elif feature_position > opinion_position:
                             distance_difference = feature_position - opinion_position
+                            end_element = distance_difference + 1
                             if(distance_difference < 2):
-                                print("Right to opinion", opinion_word,opinion_position, feature_word, feature_position)
+                                for i in range(end_element):
+                                    ind_value = sentence[opinion_position + i]
+                                    subjective_sentence.append(ind_value)
+                                    # print("Right to opinion", opinion_word,opinion_position, feature_word, feature_position)
+                                    # print("Right syntaz", ind_value)
+                                # print("----------------")
+                                sent_in_freq_tag = compare_opinion_syntax(subjective_sentence)
+                                if (sent_in_freq_tag == True):
+                                    feature_opinion_sent = (feature_word, opinion_word, o_tag, sent_id)
+                                    sentence_containing_feature_opinion.append(feature_opinion_sent)
+    return sentence_containing_feature_opinion
 
 def read_lexicon(path):
     lexicon = []
@@ -186,4 +202,231 @@ def read_lexicon(path):
                 lexicon.append(line.strip())
     return lexicon
 
-extract_opinion_of_aspect_using_lexicon()
+def compare_opinion_syntax(noun_opinion):
+    feature_opinion_syntax = []
+    feature_syntax_list = [['NN', 'VBP', 'JJ'],
+                           ['NN', 'VBZ', 'JJ'],
+                           ['NN', 'VBZ', 'RB', 'JJ'],
+                           ['NN', 'NN', 'VBZ', 'JJ'],
+                           ['NN', 'NN', 'VBZ', 'RB', 'JJ'],
+                           ['NNS', 'VBZ', 'JJ'],
+                           ['JJ', 'NN'],
+                           ['JJ', 'NNS'],
+                           ['JJR', 'NNS'],
+                           ['JJS', 'NN'],
+                           ['NN', 'JJ'],
+                           ['NN', 'NN', 'JJ'],
+                           ['NN', 'IN', 'RB', 'RB', 'JJ'],
+                           ['NN', 'IN', 'RB', 'RB', 'JJ'],
+                           ['NN', 'VBZ'],
+                           ['NNP', 'RB', 'VBZ'],
+                           ['NN', 'VBZ', 'DT', 'JJ'],
+                           ['NN', 'VBZ', 'DT', 'RB', 'JJ'],
+                           ['NN', 'VBZ', 'RB', 'DT', 'JJ'],
+                           ['NN', 'RB', 'JJ'],
+                           ['NN', 'RB', 'JJ', 'CC', 'JJ'],
+                           ['NN', 'POS', 'JJ'],
+                           ['NN', 'VBD', 'NNS'],
+                           ['NN', 'NN', 'DT', 'NN'],
+                           ['NN', 'VBZ', 'RB', 'JJ', 'TO', 'VB'],
+                           ['NN', 'VBZ', 'JJR', 'IN', 'JJ']
+                            ]
+    for word, pos in noun_opinion:
+        feature_opinion_syntax.append(pos)
+    if feature_opinion_syntax in feature_syntax_list:
+        return True
+
+
+def genearte_summary_feature_opinion():
+    # feature_opinion_sent_list = extract_opinion_of_aspect_using_lexicon()
+    # print(feature_opinion_sent_list)
+    feature_opinion_sent_list = [('g3', 'worth', 'JJ', 14), ('zoom', 'nice', 'JJ', 53), ('battery', 'solid', 'JJ', 57),
+                                 ('pictures', 'easy', 'JJ', 61), ('zoom', 'works', 'VBZ', 63)]
+    pos, neg, neu = 0, 0, 0
+    feature_score_dict = {}
+    score = {}
+
+    # feature_score_dict['Score']['pos'] = 0
+    # feature_score_dict['Score']['neg'] = 0
+    # feature_score_dict['Score']['neu'] = 0
+    for feature, opinion, o_tag, sent_id in feature_opinion_sent_list:
+        opinion_tag = get_wordnet_pos(o_tag)
+
+        syns = wordnet.synsets(opinion)
+
+        if (feature not in feature_score_dict.keys()):
+            feature_score_dict[feature] = {}
+            feature_score_dict[feature]['Score'] = {}
+            feature_score_dict[feature]['Sentence_id'] = {}
+            feature_score_dict[feature]['Score']['pos'] = []
+            feature_score_dict[feature]['Score']['neu'] = []
+            feature_score_dict[feature]['Sentence_id']['pos_id'] = []
+            feature_score_dict[feature]['Sentence_id']['neu_id'] = []
+
+        sentence_id = []
+        score_list = []
+
+        tag_synset_name = []
+        for i in syns:
+            if i.pos() in [opinion_tag]:
+                synset_name = i.name()
+                tag_synset_name.append(synset_name)
+                # synset_name = i.name().split('.')[0] + '.' + opinion_tag + '.01'
+                # print(synset_name)
+            elif i.pos() in ['s']:
+                tag_synset_name.append(i.name())
+
+        if (len(tag_synset_name) != 0):
+            each_word_orientation = sentiwordnet.senti_synset(tag_synset_name[0])
+            print(feature, opinion, "Positive Score: ", each_word_orientation.pos_score(), "Negative Score: ",
+                  each_word_orientation.neg_score())
+            if each_word_orientation.pos_score() != 0 and each_word_orientation.neg_score() == 0:
+                for f_key, f_value in feature_score_dict[feature].items():
+
+                    if f_key == 'Score':
+                        for score_key, score_value in f_value.items():
+                            print("Finding score ", score_key, score_value)
+                            if score_key == 'pos':
+                                if score_value:
+                                    score_list = score_value
+                                    score_list.append(each_word_orientation.pos_score())
+                                else:
+                                    score_list.append(each_word_orientation.pos_score())
+                    if f_key == 'Sentence_id':
+                        for s_key, s_value in f_value.items():
+                            print("Finding sentence id ", s_key, s_value, sent_id)
+                            if s_key == 'pos_id':
+                                if s_value:
+                                    sentence_id = s_value
+                                    # sentence_id = list(str(s_value).split(','))
+                                    sentence_id.append(sent_id)
+                                    break
+                                else:
+                                    print("sent id", sent_id)
+                                    sentence_id.append(sent_id)
+
+                feature_score_dict[feature]['Score']['pos'] = score_list
+                feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+            # For neutral
+            elif each_word_orientation.pos_score() == 0 and each_word_orientation.neg_score() == 0:
+                for f_key, f_value in feature_score_dict[feature].items():
+                    if f_key == 'Score':
+                        for score_key, score_value in f_value.items():
+                            print("Finding score ", score_key, score_value)
+                            if score_key == 'neu':
+                                if score_value:
+                                    neu = score_value
+                                    neu += 1
+                                else:
+                                    neu += 1
+                    if f_key == 'Sentence_id':
+                        for s_key, s_value in f_value.items():
+                            print("Finding sentence id ", s_key, s_value, sent_id)
+                            if s_key == 'neu_id':
+                                if s_value:
+                                    sentence_id = s_value
+                                    # sentence_id = list(str(s_value).split(','))
+                                    sentence_id.append(sent_id)
+                                    break
+                                else:
+                                    print("sent id", sent_id)
+                                    sentence_id.append(sent_id)
+
+                feature_score_dict[feature]['Score']['neu'] = neu
+                feature_score_dict[feature]['Sentence_id']['neu_id'] = sentence_id
+            # elif each_word_orientation.neg_score() != 0 and each_word_orientation.pos_score() == 0:
+            #     # opinion_orientation_of_feature -= each_word_orientation.neg_score()
+            #     neg += 1
+            # elif each_word_orientation.pos_score()  != 0 and each_word_orientation.neg_score() != 0:
+            #     if(each_word_orientation.pos_score - each_word_orientation.neg_score() > 0):
+            #         pos +=1
+            #     else:
+            #         neg += 1
+            # else:
+            #     neu += 1
+
+        #     for f_key, f_value in feature_score_dict[feature].items():
+        #         print("before", f_key, f_value)
+        #         if f_key == 'Score':
+        #             for score_key, score_value in f_value.items():
+        #                 if score_value:
+        #                     score_list = score_value
+        #                     score_list.append(each_word_orientation.pos_score())
+        #                 else:
+        #                     score_list.append(each_word_orientation.pos_score())
+        #         if f_key == 'Sentence_id':
+        #             for s_key, s_value in f_value.items():
+        #                 if s_value:
+        #                     sentence_id = s_value
+        #                     # sentence_id = list(str(s_value).split(','))
+        #                     sentence_id.append(sent_id)
+        #                     break
+        #                 else:
+        #                     sentence_id.append(sent_id)
+        #
+        # feature_score_dict[feature]['Score']['pos'] = score_list
+        # feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+
+
+        print(feature_score_dict)
+        print('------------------')
+
+
+        # if (len(syns) != 0):
+        #     word = syns[0].name()
+        #     each_word_orientation = sentiwordnet.senti_synset(word)
+        #     print(feature, opinion, each_word_orientation)
+        #     if each_word_orientation.pos_score() != 0:
+        #         pass
+        #
+        #         # print("Score = ", feature_score_dict)
+        #     feature_score_dict[feature]['Sentence_id'].append(sent_id)
+        # print(feature, "Sentence = ", feature_score_dict[feature]['Sentence_id'])
+        # print("Feature = ", feature_score_dict[feature])
+
+
+
+
+
+        #         if each_word_orientation.pos_score() - each_word_orientation.neg_score() > 0:
+        #             # new_value = 0
+        #             print(feature, feature_score_dict[feature]['Score']['pos'])
+        #             if(feature_score_dict[feature]['Score']['pos']!= ''):
+        #                 feature_score_dict[feature]['Score']['pos'] = 1
+        #             else:
+        #                 previou_value = feature_score_dict[feature]['Score']['pos']
+        #                 new_value = previou_value + 1
+        #                 feature_score_dict[feature]['Score']['pos'] = new_value
+        #             print(feature, feature_score_dict[feature]['Score']['pos'])
+        #             # feature_score_dict[feature]['Score']['pos'] += 1
+        #             # pos += 1
+        #             # feature_score_dict[feature]['Sentence_id'].append(sent_id)
+        #         else:
+        #             neg += 1
+        #             # feature_score_dict[feature]['Sentence_id'].append(sent_id)
+        #     elif each_word_orientation.neg_score() != 0:
+        #         neg += 1
+        #         # feature_score_dict[feature]['Sentence_id'].append(sent_id)
+        #     else:
+        #         neu += 1
+        # feature_score_dict[feature]['Sentence_id'].append(sent_id)
+
+                # feature_score_dict[feature]['Score'] = {feature_score_dict[feature]['Score']['pos']}
+            # feature_score_dict[feature]['Score'] = {'pos': pos, 'neg': neg, 'neu':neu}
+
+    # print("positives =", pos, ", negatives =", neg, ", neutrals =", neu)
+
+
+def get_wordnet_pos(opinion_tag):
+
+    if opinion_tag in ['JJ', 'JJR', 'JJS']:
+        return 'a'
+    elif opinion_tag in ['VBZ', 'VBP', 'VBD']:
+        return 'v'
+    elif opinion_tag in ['NN', 'NNS']:
+        return 'n'
+    elif opinion_tag in ['RB']:
+        return 'r'
+    else:
+        return None
+genearte_summary_feature_opinion()

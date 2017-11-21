@@ -1,4 +1,4 @@
-import config, re
+import config, re, pre_processing
 import matplotlib.pyplot as plt
 
 def precision(extracted_aspect_list):
@@ -28,10 +28,17 @@ def precision(extracted_aspect_list):
     precision_value = len(ext_asp_intersection_actual) / len(extracted_aspect)
     print(precision_value)
     asp_ext_intersection_actual = []
+    asp_act_intersection_ext = []
+
     for asp in actual_aspect:
         if asp not in extracted_aspect:
             asp_ext_intersection_actual.append(asp)
-    print("Not Match aspect", len(asp_ext_intersection_actual), asp_ext_intersection_actual)
+    print("Not Match actual aspect", len(asp_ext_intersection_actual), asp_ext_intersection_actual)
+
+    for asp in extracted_aspect:
+        if asp not in actual_aspect:
+            asp_act_intersection_ext.append(asp)
+    print("Not Match expected", len(asp_act_intersection_ext), asp_act_intersection_ext)
     return precision_value
 
 
@@ -81,4 +88,6 @@ def f_measure(precision_value, recall_value):
 def get_actual_aspect():
     file = open(config.MANUAL_LABLED_ASPECT_PATH + "product_aspects_Canon G3_ml.txt", "r").read()
     actual_product = file.split('\n')
+    # lemmatized = pre_processing.lemmatization(actual_product)
+    # print("Lemma evaluation", len(lemmatized), lemmatized)
     return actual_product

@@ -9,7 +9,7 @@ def compactness_pruning():
     #             if (words distance > 3)
     #                 Remove the feature from the list;
 
-    candidate_feature_phrase = database.fetch_frequent_itemsets()
+    candidate_feature_phrase = database.fetch_final_candidate_aspects()
     sentences_list = database.fetch_sentence_from_sentence_table()
 
     feature_list_after_compactness_pruning = []
@@ -56,7 +56,7 @@ def compactness_pruning():
     return feature_list_after_compactness_pruning
 
 def redundancy_pruning():
-    min_psupport_threshold = 4
+    min_psupport_threshold = 3
     product_aspect_after_redundancy_pruning = []
     candidate_product_aspect = database.fetch_freatures_after_compactness_pruning()
 
