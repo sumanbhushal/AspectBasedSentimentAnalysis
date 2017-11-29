@@ -134,6 +134,11 @@ def fetch_nouns_per_sentence():
     cursor.execute(select_sql)
     return cursor.fetchall()
 
+def fetch_noun_nounphrase():
+    select_sql = 'SELECT noun FROM thesis.noun_chunks_per_row'
+    cursor.execute(select_sql)
+    return [x[0] for x in cursor.fetchall()]
+
 def insert_single_candidate_aspect_per_row(candidate_aspects):
     trucate_table('candidate_aspect')
     for review_id, sent_id, can_asp in candidate_aspects:
@@ -195,7 +200,7 @@ def fetch_frequent_itemsets():
     cursor.execute(select_sql)
     return [x[0] for x in cursor.fetchall()]
 
-def fetch_frequent_1_itemsets():
+def fetch_frequent_k_itemsets():
     select_sql = 'SELECT frequent_itemsets FROM thesis.frequent_itemsets_k;'
     cursor.execute(select_sql)
     return [x[0] for x in cursor.fetchall()]
@@ -229,7 +234,7 @@ def fetch_freatures_after_compactness_pruning():
     return [x[0] for x in cursor.fetchall()]
 
 def fetch_feature_for_wikipedia_crawl():
-    select_sql = 'SELECT count(*) as ct, nouns FROM thesis.nouns_per_sentence group by nouns order by ct desc;'
+    select_sql = 'SELECT count(*) as ct, nouns FROM thesis.nouns_chunks_per_sentence group by nouns order by ct desc;'
     cursor.execute(select_sql)
     entity = cursor.fetchone()
     return entity[1]

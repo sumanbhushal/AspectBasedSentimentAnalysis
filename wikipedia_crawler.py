@@ -1,12 +1,10 @@
 import urllib.request
-import re, database
+import re, database, pre_processing
 
 def wiki_crawler():
     entity_name = database.fetch_feature_for_wikipedia_crawl()
-    print(entity_name)
     base_url = 'https://en.wikipedia.org/wiki'
     entity_url = base_url + '/' + entity_name
-    print(entity_url)
     return extract_internal_link(entity_url)
 
 def extract_internal_link(entity_url):
@@ -40,5 +38,33 @@ def extract_internal_link(entity_url):
         return final_list
     except Exception as e:
         print(str(e))
+
+def product_features_from_wikipedia():
+    # wikipedia Crawler
+    noun_nounphrases_per_sent = database.fetch_noun_nounphrase()
+    extracted_noun_nounphrases = []
+    for aspect in noun_nounphrases_per_sent:
+        # for count, aspect in extracted_aspect_list:
+        rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
+        aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
+        extracted_noun_nounphrases.append(aspect_replacing_space_with_underscore)
+    wiki_list = wiki_crawler()
+
+    exp_asp_intersection_wiki = []
+    match_with_wiki_dict = {}
+    for asp in extracted_noun_nounphrases:
+        for s in filter(lambda x: asp == x, wiki_list):
+            exp_asp_intersection_wiki.append(asp)
+    for asp in exp_asp_intersection_wiki:
+        if (match_with_wiki_dict.keys() != asp):
+            match_with_wiki_dict[asp] = exp_asp_intersection_wiki.count(asp)
+
+    new_list = []
+    for key, value in match_with_wiki_dict.items():
+        if len(key) > 2:
+            new_list.append(key)
+
+    feature_after_lemmatization = pre_processing.lemmatization(new_list)
+    return feature_after_lemmatization
 
 # print(len(wiki_crawler('phone')),wiki_crawler('phone'))

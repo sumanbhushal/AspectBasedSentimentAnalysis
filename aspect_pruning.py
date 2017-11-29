@@ -1,4 +1,4 @@
-import database
+import database, re
 
 
 def compactness_pruning():
@@ -80,4 +80,10 @@ def redundancy_pruning():
                         product_aspect_after_redundancy_pruning.append(term)
             else:
                 product_aspect_after_redundancy_pruning.append(term)
-    return product_aspect_after_redundancy_pruning
+
+    prune_feature = []
+    for aspect in product_aspect_after_redundancy_pruning:
+        rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
+        aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
+        prune_feature.append(aspect_replacing_space_with_underscore)
+    return prune_feature

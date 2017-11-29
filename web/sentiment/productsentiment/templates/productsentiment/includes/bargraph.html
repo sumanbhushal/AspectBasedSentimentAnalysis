@@ -1,0 +1,50 @@
+{% block content %}
+
+<canvas id="BarGraph"></canvas>
+
+
+<script>
+    var content = document.getElementById("BarGraph").getContext("2d");
+
+    var data = {
+
+      labels: {{ Product_feature |safe }},
+      datasets: [{
+        label: "Positve",
+        backgroundColor: "#71b2fa",
+        data: {{ Positive_values }}
+      }, {
+        label: "Negative",
+        backgroundColor: "#f07481",
+        data: {{ Negative_values }}
+      }, {
+        label: "Neutral",
+        backgroundColor: "#72e48c",
+        data: {{ Neutral_values }}
+      }]
+    };
+
+    var myBarChart = new Chart(content, {
+      type: 'bar',
+      data: data,
+      options: {
+        barValueSpacing: 20,
+        onClick: clickEvent,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+            }
+          }]
+        }
+    }
+});
+
+function clickEvent(event, array){
+    if(array[0]){
+        console.log(array[0])
+    }
+}
+
+</script>
+{% endblock %}

@@ -3,6 +3,9 @@ from nltk import word_tokenize
 from nltk.corpus import wordnet
 from nltk.corpus import sentiwordnet
 from collections import defaultdict
+import matplotlib.pyplot as plt
+import numpy as np
+import math
 
 
 def extract_opinon_of_feature(pos_tagged_sentence_list):
@@ -469,15 +472,17 @@ def plot_in_graph():
                'zoom': {'Score': {'pos': 1, 'neg': 2, 'neu': 2}, 'Sentence_id': {'pos_id': [53], 'neg_id': [163, 263], 'neu_id': [63, 363]}},
                'battery': {'Score': {'pos': 3, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [57, 157, 257], 'neg_id': [], 'neu_id': []}},
                'pictures': {'Score': {'pos': 1, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [61], 'neg_id': [], 'neu_id': []}}}
-
+    features = []
     for feature_key, feature_values in feature_score_dict.items():
         pos, neg, neu = 0,0,0
         pos_sentences = []
         neg_sentences = []
         neu_sentences = []
+        features.append(feature_key)
         # print(feature_key, feature_values)
         for s_key, s_value in feature_values.items():
             # print(s_key, s_value)
+
             if s_key == 'Score':
                 for score_key, score_value in s_value.items():
                     if score_key == 'pos':
@@ -499,4 +504,48 @@ def plot_in_graph():
               "Positive Sentence ", pos_sentences,
               "Negative sentence ", neg_sentences,
               "Neutral Sentence ", neu_sentences)
-plot_in_graph()
+
+        # max_value_for_graph = max(pos, neg, neu)
+        max_value_for_graph = 10
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    #
+    # ## the data
+    # N = 4
+    # pos = [18, 35, 30, 35]
+    # neg = [25, 32, 34, 20]
+    # neu = [10, 2, 0, 5]
+    #
+    # ## necessary variables
+    # ind = np.arange(N)  # the x locations for the groups
+    # width = 0.25  # the width of the bars
+    #
+    # ## the bars
+    # rects1 = ax.bar(ind - width, pos, width,
+    #                 color='green',
+    #                 error_kw=dict(elinewidth=2, ecolor='green'))
+    #
+    # rects2 = ax.bar(ind, neg, width,
+    #                 color='red',
+    #                 error_kw=dict(elinewidth=2, ecolor='red'))
+    #
+    # rects3 = ax.bar(ind + width, neu, width,
+    #                 color='blue',
+    #                 error_kw=dict(elinewidth=2, ecolor='blue'))
+    #
+    # # axes and labels
+    # # ax.set_xlim(-width, len(ind) + width)
+    # ax.set_ylim(0, 45)
+    # ax.set_ylabel('Scores')
+    # ax.set_title('Scores by Positive, Negative and Neutral')
+    # xTickMarks = [i for i in features]
+    # ax.set_xticks(ind)
+    # xtickNames = ax.set_xticklabels(xTickMarks)
+    # plt.setp(xtickNames, rotation=45, fontsize=10)
+    #
+    # ## add a legend
+    # ax.legend((rects1[0], rects2[0], rects3[0]), ('Positive', 'Negative', 'Neutral'))
+    #
+    # plt.show()
+# plot_in_graph()

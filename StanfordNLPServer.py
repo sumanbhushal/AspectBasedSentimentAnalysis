@@ -39,6 +39,7 @@ if __name__ == '__main__':
     print ("POS:", nlpServer.pos(text))
     print( "Tokens:", nlpServer.word_tokenize(text))
     print( "NER:", nlpServer.ner(text))
+    parse = nlpServer.parse(text)
     print( "Parse:", nlpServer.parse(text))
     print ("Dep Parse:", nlpServer.dependency_parse(text))
 

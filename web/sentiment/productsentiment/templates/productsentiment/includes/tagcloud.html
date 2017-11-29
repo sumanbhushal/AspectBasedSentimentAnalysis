@@ -1,0 +1,15 @@
+{% block content %}
+<div id="wordcloud" style="width: 500px; height: 350px;"></div>
+<script>
+
+
+var word_list = [
+   {% for feature in Product_feature_list %}
+        {text: "{{ feature.name|safe }}", weight: {{ feature.positive |safe }}, link: "http:{{ feature.name|safe }}"},
+    {% endfor %}
+];
+$(document).ready(function() {
+   $("#wordcloud").jQCloud(word_list);
+});
+</script>
+{% endblock %}

@@ -24,22 +24,24 @@ def cbs_apriori_itemset():
     if L1 != '':
         database.insert_frequent_1_itemsets(L1)
 
+    # print(len(L1), L1)
     # find the frequent 2-itemsets
     C2 = generate_2_itemset(L1)
     current_C2 = scan_in_database(C2)
     Lk[2] = prune(current_C2, min_sup)
     if Lk[2] != '':
         database.insert_frequent_k_itemsets(Lk)
+    print(len(Lk[2]), Lk[2])
 
-    Lk = {}
-    # find the frequent 3-itemsets
-    C3 = generate_3_itemset(L1)
-    # print(C3)
-    current_C3 = scan_in_database(C3)
-    Lk[3] = prune(current_C3, min_sup)
-
-    if Lk[3] != '':
-        database.insert_frequent_k_itemsets(Lk)
+    # Lk = {}
+    # # find the frequent 3-itemsets
+    # C3 = generate_3_itemset(L1)
+    # # print(C3)
+    # current_C3 = scan_in_database(C3)
+    # Lk[3] = prune(current_C3, min_sup)
+    #
+    # if Lk[3] != '':
+    #     database.insert_frequent_k_itemsets(Lk)
     # print(len(Lk[3]), Lk[3])
 
 
@@ -65,7 +67,7 @@ def generate_3_itemset(L):
 
 def has_infrequent_subset(k_itemset):
     frequent_k_itemset = []
-    k_1_itemset = database.fetch_frequent_1_itemsets()
+    k_1_itemset = database.fetch_frequent_k_itemsets()
     k_subset = find_subsets(k_itemset, 2)
     subset_list = []
     for each_item in k_subset:
@@ -102,7 +104,7 @@ def scan_in_database(Ct):
     return current_candidate
 
 def frequent_itemset_from_db():
-    frequent_itemsets = database.fetch_frequent_1_itemsets()
+    frequent_itemsets = database.fetch_frequent_k_itemsets()
     frequent_itemsets_list = []
     for freq_item in frequent_itemsets:
         # print(freq_item.split(' '))
@@ -113,4 +115,3 @@ def frequent_itemset_from_db():
                     frequent_itemsets_list.append(combine_word)
     database.insert_final_candidate_aspects(frequent_itemsets_list)
     return database.fetch_final_candidate_aspects()
-    # print(len(frequent_itemsets_list), frequent_itemsets_list)

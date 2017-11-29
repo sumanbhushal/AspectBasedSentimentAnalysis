@@ -17,8 +17,8 @@ def precision(extracted_aspect_list):
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         extracted_aspect.append(aspect_replacing_space_with_underscore)
 
-    print("Extracted asepct", len(extracted_aspect),extracted_aspect)
-    print("Actual Aspect", len(actual_aspect),actual_aspect)
+    # print("Extracted asepct", len(extracted_aspect),extracted_aspect)
+    # print("Actual Aspect", len(actual_aspect),actual_aspect)
 
     ext_asp_intersection_actual = []
     for ex_asp in extracted_aspect:
@@ -33,12 +33,12 @@ def precision(extracted_aspect_list):
     for asp in actual_aspect:
         if asp not in extracted_aspect:
             asp_ext_intersection_actual.append(asp)
-    print("Not Match actual aspect", len(asp_ext_intersection_actual), asp_ext_intersection_actual)
+    print("Not Match actual aspect with extracted", len(asp_ext_intersection_actual), asp_ext_intersection_actual)
 
     for asp in extracted_aspect:
         if asp not in actual_aspect:
             asp_act_intersection_ext.append(asp)
-    print("Not Match expected", len(asp_act_intersection_ext), asp_act_intersection_ext)
+    print("Not Match expected with actual", len(asp_act_intersection_ext), asp_act_intersection_ext)
     return precision_value
 
 
@@ -58,14 +58,14 @@ def recall(extracted_aspect_list):
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         extracted_aspect.append(aspect_replacing_space_with_underscore)
 
-    print(len(extracted_aspect), extracted_aspect)
-    print(len(actual_aspect), actual_aspect)
+    # print(len(extracted_aspect), extracted_aspect)
+    # print(len(actual_aspect), actual_aspect)
 
     ext_asp_intersection_actual = []
     for ex_asp in extracted_aspect:
         if ex_asp in actual_aspect:
             ext_asp_intersection_actual.append(ex_asp)
-    print(len(ext_asp_intersection_actual), ext_asp_intersection_actual)
+    # print(len(ext_asp_intersection_actual), ext_asp_intersection_actual)
     recall_value = len(ext_asp_intersection_actual) / len(actual_aspect)
     print(recall_value)
     return recall_value
@@ -86,8 +86,9 @@ def f_measure(precision_value, recall_value):
 
 
 def get_actual_aspect():
-    file = open(config.MANUAL_LABLED_ASPECT_PATH + "product_aspects_Canon G3_ml.txt", "r").read()
+    file = open(config.MANUAL_LABLED_ASPECT_PATH + "CanonG3_feature_list.txt", "r").read()
     actual_product = file.split('\n')
-    # lemmatized = pre_processing.lemmatization(actual_product)
+    # print("From file", len(actual_product), actual_product)
+    lemmatized = pre_processing.lemmatization(actual_product)
     # print("Lemma evaluation", len(lemmatized), lemmatized)
-    return actual_product
+    return lemmatized
