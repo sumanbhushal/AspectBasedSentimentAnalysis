@@ -118,7 +118,9 @@ def extract_opinion_of_aspect_using_lexicon():
 
     positive_lexicon = read_lexicon(config.LEXICONS_PATH + "positive-words.txt")
     negative_lexicon = read_lexicon(config.LEXICONS_PATH + "negative-words.txt")
-    features_list = ['lens', 'zoom', 'battery', 'pictures', 'canon', 'g3']
+    # features_list = ['lens', 'zoom', 'battery life', 'picture', 'canon', 'g3']
+    features_list = database.fetch_freatures_after_compactness_pruning()
+    # print(len(features_list), features_list)
 
     lex_list = []
     for pos_lex in positive_lexicon:
@@ -134,7 +136,10 @@ def extract_opinion_of_aspect_using_lexicon():
         feature_word_and_position = []
         sentence = eval(sentences)
         index = 0
+        prev_word = ''
+
         for word, tag in sentence:
+            current_word = ''
             for lex_word in lex_list:
                 if word == lex_word:
                     # sentences_with_feature.append(sentences)
@@ -144,10 +149,30 @@ def extract_opinion_of_aspect_using_lexicon():
                     # print(sent_id, lex_word, word_index, sentence)
 
             for feature in features_list:
-                if feature == word:
-                    word_tag = (word, tag)
-                    feature_tag_index = (feature, tag, index)
-                    feature_word_and_position.append(feature_tag_index)
+                # print("FEATRURE", feature.split()[0])
+                if len(feature.split()) == 1:
+                    if feature == word:
+                        word_tag = (word, tag)
+                        feature_tag_index = (feature, tag, index)
+                        feature_word_and_position.append(feature_tag_index)
+                else:
+                    complete_word = ''
+                    for i in range(len(feature.split())):
+                        # print("Feature", feature)
+                        if feature.split()[i] == word:
+                            if prev_word != '':
+                                current_word = prev_word + ' ' + feature.split()[i]
+                            else:
+                                current_word = feature.split()[i]
+                            prev_word = current_word
+                    if len(current_word) != 1 and current_word != '':
+                        complete_word = current_word
+                    if complete_word == feature:
+                        word_tag = (word, tag)
+                        feature_tag_index = (feature, tag, index)
+                        feature_word_and_position.append(feature_tag_index)
+                        # print("Complete word", complete_word, len(complete_word.split()),word, sent_id)
+
             index += 1
 
         # for word, tag in sentence:
@@ -162,6 +187,7 @@ def extract_opinion_of_aspect_using_lexicon():
                 opinion_word = o_word
 
                 if(feature_word_and_position):
+                    print(feature_word_and_position)
                     for p_word, p_tag, p_index in feature_word_and_position:
                         feature_position = p_index
                         feature_word = p_word
@@ -195,6 +221,7 @@ def extract_opinion_of_aspect_using_lexicon():
                                 if (sent_in_freq_tag == True):
                                     feature_opinion_sent = (feature_word, opinion_word, o_tag, sent_id)
                                     sentence_containing_feature_opinion.append(feature_opinion_sent)
+    print("FEATURE", len(sentence_containing_feature_opinion), sentence_containing_feature_opinion)
     return sentence_containing_feature_opinion
 
 def read_lexicon(path):
@@ -241,14 +268,15 @@ def compare_opinion_syntax(noun_opinion):
 
 
 def genearte_summary_feature_opinion():
-    # feature_opinion_sent_list = extract_opinion_of_aspect_using_lexicon()
-    feature_opinion_sent_list = [('g3', 'worth', 'JJ', 14), ('zoom', 'nice', 'JJ', 53), ('battery', 'solid', 'JJ', 57),
-                                 ('pictures', 'easy', 'JJ', 61), ('zoom', 'works', 'VBZ', 63), ('zoom', 'bad', 'JJ', 163),
-                                 ('zoom', 'worse', 'JJ', 263), ('zoom', 'works', 'VBZ', 363), ('battery', 'nice', 'JJ', 157),
-                                 ('battery', 'best', 'JJ', 257)]
+    feature_opinion_sent_list = extract_opinion_of_aspect_using_lexicon()
+    # feature_opinion_sent_list = [('g3', 'worth', 'JJ', 14), ('zoom', 'nice', 'JJ', 53), ('battery', 'solid', 'JJ', 57),
+    #                              ('pictures', 'easy', 'JJ', 61), ('zoom', 'works', 'VBZ', 63), ('zoom', 'bad', 'JJ', 163),
+    #                              ('zoom', 'worse', 'JJ', 263), ('zoom', 'works', 'VBZ', 363), ('battery', 'nice', 'JJ', 157),
+    #                              ('battery', 'best', 'JJ', 257)]
     feature_score_dict = {}
     for feature, opinion, o_tag, sent_id in feature_opinion_sent_list:
         opinion_tag = get_wordnet_pos(o_tag)
+        negation(str(sent_id))
 
         syns = wordnet.synsets(opinion)
 
@@ -505,47 +533,17 @@ def plot_in_graph():
               "Negative sentence ", neg_sentences,
               "Neutral Sentence ", neu_sentences)
 
-        # max_value_for_graph = max(pos, neg, neu)
-        max_value_for_graph = 10
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    #
-    # ## the data
-    # N = 4
-    # pos = [18, 35, 30, 35]
-    # neg = [25, 32, 34, 20]
-    # neu = [10, 2, 0, 5]
-    #
-    # ## necessary variables
-    # ind = np.arange(N)  # the x locations for the groups
-    # width = 0.25  # the width of the bars
-    #
-    # ## the bars
-    # rects1 = ax.bar(ind - width, pos, width,
-    #                 color='green',
-    #                 error_kw=dict(elinewidth=2, ecolor='green'))
-    #
-    # rects2 = ax.bar(ind, neg, width,
-    #                 color='red',
-    #                 error_kw=dict(elinewidth=2, ecolor='red'))
-    #
-    # rects3 = ax.bar(ind + width, neu, width,
-    #                 color='blue',
-    #                 error_kw=dict(elinewidth=2, ecolor='blue'))
-    #
-    # # axes and labels
-    # # ax.set_xlim(-width, len(ind) + width)
-    # ax.set_ylim(0, 45)
-    # ax.set_ylabel('Scores')
-    # ax.set_title('Scores by Positive, Negative and Neutral')
-    # xTickMarks = [i for i in features]
-    # ax.set_xticks(ind)
-    # xtickNames = ax.set_xticklabels(xTickMarks)
-    # plt.setp(xtickNames, rotation=45, fontsize=10)
-    #
-    # ## add a legend
-    # ax.legend((rects1[0], rects2[0], rects3[0]), ('Positive', 'Negative', 'Neutral'))
-    #
-    # plt.show()
-# plot_in_graph()
+def negation(sentence_id):
+    print(sentence_id)
+    sentence = database.fetch_sentnece_by_id(sentence_id)
+    print(sentence)
+    negative_word_list = ["aint", "arent", "cannot", "cant", "couldnt", "darent", "didnt", "doesnt",
+                          "ain’t", "aren’t", "can’t", "couldn’t", "daren’t", "didn’t", "doesn’t",
+                          "dont", "hadnt", "hasnt", "havent", "isnt", "mightnt","mustnt", "neither",
+                          "don’t", "hadn’t", "hasn’t", "haven’t", "isn’t", "mightn’t", "mustn’t", "neednt", "needn’t",
+                          "never", "none", "nope", "nor", "not", "nothing", "nowhere", "oughtnt", "shant", "shouldnt",
+                          "uhuh", "wasnt", "werent", "oughtn’t", "shan’t", "shouldn’t", "uhuh",
+                          "wasn’t", "weren’t", "without", "wont", "wouldnt", "won’t", "wouldn’t", "rarely", "seldom", "despite"]
+# extract_opinion_of_aspect_using_lexicon()
+genearte_summary_feature_opinion()

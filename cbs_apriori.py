@@ -28,6 +28,7 @@ def cbs_apriori_itemset():
     # find the frequent 2-itemsets
     C2 = generate_2_itemset(L1)
     current_C2 = scan_in_database(C2)
+    # print("CT", current_C2)
     Lk[2] = prune(current_C2, min_sup)
     if Lk[2] != '':
         database.insert_frequent_k_itemsets(Lk)

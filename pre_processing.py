@@ -10,33 +10,38 @@ def review_cleanup_labeled_data(sentences):
     :param sentences:
     :return: cleaned manually labeled data
     """
-    # Removing explict product aspect formed with three words and a hyperlink and sentiment score
-    rg_exp_for_3plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    review_filtered = re.sub(rg_exp_for_3plus, '', sentences)
 
-    # Removing explicit product aspect formed with two words and a hyperlink and sentiment score
-    rg_exp_for_2plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    review_filtered_hyperlink = re.sub(rg_exp_for_2plus, '', review_filtered)
+    rg_exp_main = r"\w+.*\[?[+/-]\d\]?\#\#"
+    sent_cleaning = re.sub(rg_exp_main, '', sentences)
+    # print(re.findall(rg_exp_main, sentences))
 
-    # Removing explict product aspect with alphanumeric characters and sentiment score
-    rg_exp_alphanumeric = re.compile('((?:[a-z][a-z]*[0-9]+[a-z0-9]*))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review = re.findall(rg_exp_alphanumeric, sentence_list)
-    review_filtered_alphanumeric = re.sub(rg_exp_alphanumeric, '', review_filtered_hyperlink)
+    # # Removing explict product aspect formed with three words and a hyperlink and sentiment score
+    # rg_exp_for_3plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review_filtered = re.sub(rg_exp_for_3plus, '', sentences)
+    #
+    # # Removing explicit product aspect formed with two words and a hyperlink and sentiment score
+    # rg_exp_for_2plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review_filtered_hyperlink = re.sub(rg_exp_for_2plus, '', review_filtered)
+    #
+    # # Removing explict product aspect with alphanumeric characters and sentiment score
+    # rg_exp_alphanumeric = re.compile('((?:[a-z][a-z]*[0-9]+[a-z0-9]*))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # # review = re.findall(rg_exp_alphanumeric, sentence_list)
+    # review_filtered_alphanumeric = re.sub(rg_exp_alphanumeric, '', review_filtered_hyperlink)
+    #
+    # # Removing explict product aspect with two words separated with space and sentiment score
+    # rg_exp_two_words_aspects = re.compile('(\\w+)(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review_filtered_two_words_aspects = re.sub(rg_exp_two_words_aspects, '', review_filtered_alphanumeric)
+    #
+    # # Removing explict product aspect with single words and sentiment score
+    # rg_exp_single_words_aspects = re.compile('(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review_filtered_single_words_aspects = re.sub(rg_exp_single_words_aspects, '', review_filtered_two_words_aspects)
+    #
+    # # Removing title [t]
+    # rg_exp_title = re.compile('(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
+    # review_filtered_title = re.sub(rg_exp_title, '', review_filtered_single_words_aspects)
+    # #print(re.findall(rg_exp_title, review_filtered_single_words_aspects), len(re.findall(rg_exp_title, review_filtered_single_words_aspects)))
 
-    # Removing explict product aspect with two words separated with space and sentiment score
-    rg_exp_two_words_aspects = re.compile('(\\w+)(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    review_filtered_two_words_aspects = re.sub(rg_exp_two_words_aspects, '', review_filtered_alphanumeric)
-
-    # Removing explict product aspect with single words and sentiment score
-    rg_exp_single_words_aspects = re.compile('(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    review_filtered_single_words_aspects = re.sub(rg_exp_single_words_aspects, '', review_filtered_two_words_aspects)
-
-    # Removing title [t]
-    rg_exp_title = re.compile('(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    review_filtered_title = re.sub(rg_exp_title, '', review_filtered_single_words_aspects)
-    #print(re.findall(rg_exp_title, review_filtered_single_words_aspects), len(re.findall(rg_exp_title, review_filtered_single_words_aspects)))
-
-    return review_filtered_title
+    return sent_cleaning
 
 
 def review_cleanup_symbols(sentences):
@@ -141,3 +146,7 @@ def get_synonyms_set(noun_list):
     product_aspect = sorted(product_aspects_dictionary.items(), key=lambda x: x[1], reverse=True)
     # print(len(product_aspect),product_aspect)
     return product_aspect
+
+def pronoun_resolution(sentences):
+    print(sentences)
+    pass

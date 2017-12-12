@@ -346,3 +346,7 @@ def calcualte_psupport_for_term_with_superset(ids, term):
 # connection.close()
 
 
+def fetch_sentnece_by_id(sent_id):
+    sql_query = "SELECT sentence FROM thesis.sentences WHERE sentences_id = " + sent_id + ";"
+    cursor.execute(sql_query)
+    return cursor.fetchall()

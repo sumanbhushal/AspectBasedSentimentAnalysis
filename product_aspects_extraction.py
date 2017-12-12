@@ -10,6 +10,7 @@ def noun_chunking_for_stanford_pos(pos_tagged_text):
     noun_list_after_chunk = []
     noun_list = []
     noun_list_Dict = {}
+    # chunkRegExpress = r"""NP: {<NN.*>}"""
     chunkRegExpress = r"""NP: {<JJ>*<NN.*>}"""
     chunkParsar = nltk.RegexpParser(chunkRegExpress)
     for review_id, sent_id, pos_tagged_content in pos_tagged_text:
