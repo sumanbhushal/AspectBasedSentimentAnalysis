@@ -71,7 +71,6 @@ def extract_manual_labeled_aspect(review):
         noun_list_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', noun)
         new_noun_count_pair = (noun_list_replacing_space_with_underscore, count)
         output_aspects.append(new_noun_count_pair)
-    print(output_aspects)
     return output_aspects
 
 

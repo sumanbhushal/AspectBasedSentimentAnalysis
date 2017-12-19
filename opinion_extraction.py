@@ -546,4 +546,4 @@ def negation(sentence_id):
                           "uhuh", "wasnt", "werent", "oughtn’t", "shan’t", "shouldn’t", "uhuh",
                           "wasn’t", "weren’t", "without", "wont", "wouldnt", "won’t", "wouldn’t", "rarely", "seldom", "despite"]
 # extract_opinion_of_aspect_using_lexicon()
-genearte_summary_feature_opinion()
+# genearte_summary_feature_opinion()

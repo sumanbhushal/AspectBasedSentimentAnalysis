@@ -11,37 +11,11 @@ def review_cleanup_labeled_data(sentences):
     :return: cleaned manually labeled data
     """
 
-    rg_exp_main = r"\w+.*\[?[+/-]\d\]?\#\#"
-    sent_cleaning = re.sub(rg_exp_main, '', sentences)
+    rg_exp_main = r"\w+.*\[?[+/-]\d\]?\#\#|\w+.*\[?[+/-]\d\]\[\w+\]?\#\#"
+    filter_review = re.sub(rg_exp_main, '', sentences)
     # print(re.findall(rg_exp_main, sentences))
 
-    # # Removing explict product aspect formed with three words and a hyperlink and sentiment score
-    # rg_exp_for_3plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review_filtered = re.sub(rg_exp_for_3plus, '', sentences)
-    #
-    # # Removing explicit product aspect formed with two words and a hyperlink and sentiment score
-    # rg_exp_for_2plus = re.compile('(\\w+)(-)((?:[a-z][a-z]+))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review_filtered_hyperlink = re.sub(rg_exp_for_2plus, '', review_filtered)
-    #
-    # # Removing explict product aspect with alphanumeric characters and sentiment score
-    # rg_exp_alphanumeric = re.compile('((?:[a-z][a-z]*[0-9]+[a-z0-9]*))(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # # review = re.findall(rg_exp_alphanumeric, sentence_list)
-    # review_filtered_alphanumeric = re.sub(rg_exp_alphanumeric, '', review_filtered_hyperlink)
-    #
-    # # Removing explict product aspect with two words separated with space and sentiment score
-    # rg_exp_two_words_aspects = re.compile('(\\w+)(\\s+)(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review_filtered_two_words_aspects = re.sub(rg_exp_two_words_aspects, '', review_filtered_alphanumeric)
-    #
-    # # Removing explict product aspect with single words and sentiment score
-    # rg_exp_single_words_aspects = re.compile('(\\w+)(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review_filtered_single_words_aspects = re.sub(rg_exp_single_words_aspects, '', review_filtered_two_words_aspects)
-    #
-    # # Removing title [t]
-    # rg_exp_title = re.compile('(\\[.*?\\])', re.IGNORECASE | re.DOTALL)
-    # review_filtered_title = re.sub(rg_exp_title, '', review_filtered_single_words_aspects)
-    # #print(re.findall(rg_exp_title, review_filtered_single_words_aspects), len(re.findall(rg_exp_title, review_filtered_single_words_aspects)))
-
-    return sent_cleaning
+    return filter_review
 
 
 def review_cleanup_symbols(sentences):
@@ -78,6 +52,19 @@ def word_tokenize_review(sentence_list):
     return ids_tokenize_value
 
 
+# Lemmatize all the sentence at the beginning
+def lemmatization_sentence(sentence):
+    """
+    Normalizing words as many variations of words carry same meaning
+    :param sentence:
+    """
+    sentence_after_lemmatization = []
+    lemmatizer = WordNetLemmatizer()
+    for words in sentence.split():
+        lemma_word = lemmatizer.lemmatize(words)
+        sentence_after_lemmatization.append(lemma_word)
+    return ' '.join(sentence_after_lemmatization)
+
 # Filter Stopwords - (English)
 def filter_stopwords(product_aspect_list):
     """
@@ -85,13 +72,14 @@ def filter_stopwords(product_aspect_list):
     :return: product aspect list after filtering stopwords
     """
     stop_words = set(stopwords.words('english'))
-    stop_words.update('(', ')', '.', '-', '--', '``', "'", '"')
+    new_list = ('(', ')', '.', '-', '--', '``', "'", '"', "ha", "wa", "lot")
+    stop_words.update(new_list)
     aspect_list_without_stopwords = []
     for sent_id, review_id, words in product_aspect_list:
         product_aspect = []
         for w in words:
-            if w not in stop_words:
-                product_aspect.append(w.lower())
+            if w not in stop_words and w != '' and len(w) > 1:
+                product_aspect.append(w)
         if(product_aspect):
             aspect_per_sent_after_stopwords = (sent_id, review_id, product_aspect)
             aspect_list_without_stopwords.append(aspect_per_sent_after_stopwords)
@@ -147,6 +135,3 @@ def get_synonyms_set(noun_list):
     # print(len(product_aspect),product_aspect)
     return product_aspect
 
-def pronoun_resolution(sentences):
-    print(sentences)
-    pass

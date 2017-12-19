@@ -1,4 +1,5 @@
 import database, re
+from nltk.corpus import wordnet
 
 
 def compactness_pruning():
@@ -31,34 +32,33 @@ def compactness_pruning():
                 for index, word in enumerate(sentences.split()):
                     if word == fp_word:
                         word_index_dict[fp_word] = index
-            if len(word_index_dict) > 2:
+            if (len(word_index_dict) > 2 ) and (len(fp.split("_")) == len(word_index_dict)):
                 listForm = list(word_index_dict.values())
                 previous_value = (listForm[0])
                 current_value = (listForm[1])
                 next_value = (listForm[2])
-                if current_value - previous_value < 3 and next_value - current_value < 3:
+                if current_value - previous_value < 2 and next_value - current_value < 2:
                     i += 1
-            if len(word_index_dict) > 1:
+            elif (len(word_index_dict)>1 and len(fp.split())== len(word_index_dict)):
                 listForm = list(word_index_dict.values())
                 previous_value = (listForm[0])
                 current_value = (listForm[1])
-                if current_value - previous_value < 3:
+                if current_value - previous_value < 2:
                     i += 1
+            else:
+                i += 0
 
             # Count how many times features appear in the sentence
         if feature_count_in_dict.keys() != fp:
             feature_count_in_dict[fp] = i
-
-    # print(feature_count_in_dict)
     for key, value in feature_count_in_dict.items():
-        if value > 3:
+        if value > 4:
             feature_list_after_compactness_pruning.append(key)
-    return feature_list_after_compactness_pruning
+    database.insert_features_after_compactness_pruning(feature_list_after_compactness_pruning)
 
-def redundancy_pruning():
+def redundancy_pruning(candidate_product_aspect):
     min_psupport_threshold = 3
     product_aspect_after_redundancy_pruning = []
-    candidate_product_aspect = database.fetch_freatures_after_compactness_pruning()
 
     for term in candidate_product_aspect:
         if term not in product_aspect_after_redundancy_pruning:
@@ -87,3 +87,21 @@ def redundancy_pruning():
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         prune_feature.append(aspect_replacing_space_with_underscore)
     return prune_feature
+
+
+def filter_aspect_based_on_domain_similarity(domain_name, feature_list):
+    new_aspect_list = []
+    domain = domain_name + ".n.01"
+    for aspect in feature_list:
+        try:
+            w1 = wordnet.synset(domain)
+            compare_word = aspect + ".n.01"
+            w2 = wordnet.synset(compare_word)
+            word_similarity = (w1.wup_similarity(w2))
+            if word_similarity > 0.15:
+                new_aspect_list.append(aspect)
+        except:
+            pass
+    print(new_aspect_list)
+    # return new_wiki_list
+

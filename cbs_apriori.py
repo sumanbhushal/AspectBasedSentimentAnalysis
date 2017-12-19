@@ -7,9 +7,9 @@ def cbs_apriori_itemset():
     Lk = {}
     items_in_transaction = []
 
-    # Minimum support for Apriori algorithm (0.5%)
+    # Minimum support for Apriori algorithm (0.1%)
     number_of_sentences = len(database.fetch_sentence_from_sentence_table())
-    min_sup = round(0.005*number_of_sentences)
+    min_sup = round(0.01*number_of_sentences)
 
     # Get candidate aspect from database
     transaction = database.fetch_nouns_per_sentence()
@@ -23,8 +23,8 @@ def cbs_apriori_itemset():
     L1 = prune(C1, min_sup)
     if L1 != '':
         database.insert_frequent_1_itemsets(L1)
-
     # print(len(L1), L1)
+
     # find the frequent 2-itemsets
     C2 = generate_2_itemset(L1)
     current_C2 = scan_in_database(C2)
@@ -32,18 +32,23 @@ def cbs_apriori_itemset():
     Lk[2] = prune(current_C2, min_sup)
     if Lk[2] != '':
         database.insert_frequent_k_itemsets(Lk)
-    print(len(Lk[2]), Lk[2])
+    # print(len(Lk[2]), Lk[2])
 
+    # candidate_aspect_after_l2 = []
+    # for key, value in Lk[2].items():
+    #     for item in eval(key):
+    #         if item not in candidate_aspect_after_l2:
+    #             candidate_aspect_after_l2.append(item)
+    #
     # Lk = {}
     # # find the frequent 3-itemsets
-    # C3 = generate_3_itemset(L1)
-    # # print(C3)
+    # C3 = generate_3_itemset(candidate_aspect_after_l2)
     # current_C3 = scan_in_database(C3)
     # Lk[3] = prune(current_C3, min_sup)
     #
     # if Lk[3] != '':
     #     database.insert_frequent_k_itemsets(Lk)
-    # print(len(Lk[3]), Lk[3])
+    # # print(len(Lk[3]), Lk[3])
 
 
 def generate_1_itemset(items_in_transaction):
@@ -105,14 +110,17 @@ def scan_in_database(Ct):
     return current_candidate
 
 def frequent_itemset_from_db():
-    frequent_itemsets = database.fetch_frequent_k_itemsets()
+    frequent_1_itemsets = database.fetch_frequent_itemsets()
+    frequent_k_itemsets = database.fetch_frequent_k_itemsets()
     frequent_itemsets_list = []
-    for freq_item in frequent_itemsets:
-        # print(freq_item.split(' '))
-        for i in range(len(freq_item.split(' '))):
-            for subset in combinations(freq_item.split(' '), i+1):
-                combine_word = ' '.join(subset)
-                if combine_word not in frequent_itemsets_list:
-                    frequent_itemsets_list.append(combine_word)
+    for freq_1_item in frequent_1_itemsets:
+        if freq_1_item not in frequent_itemsets_list:
+            frequent_itemsets_list.append(freq_1_item)
+
+    for freq_k_item in frequent_k_itemsets:
+        if freq_k_item not in frequent_itemsets_list:
+            frequent_itemsets_list.append(freq_k_item)
+
+    # print(len(frequent_itemsets_list), frequent_itemsets_list)
     database.insert_final_candidate_aspects(frequent_itemsets_list)
     return database.fetch_final_candidate_aspects()

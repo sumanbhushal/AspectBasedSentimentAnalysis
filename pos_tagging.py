@@ -29,4 +29,4 @@ def stanford_pos_tagging(sentence_list):
         pos_tagged = getattr(nlpServer, 'pos')
         combine_value = (sent_id, review_id, pos_tagged(sentences))
         ids_pos_value.append(combine_value)
-    return ids_pos_value
+    database.insert_postagged_sent_into_db(ids_pos_value)

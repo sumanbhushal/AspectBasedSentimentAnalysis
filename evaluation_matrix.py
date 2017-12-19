@@ -86,7 +86,7 @@ def f_measure(precision_value, recall_value):
 
 
 def get_actual_aspect():
-    file = open(config.MANUAL_LABLED_ASPECT_PATH + "product_aspects_Canon G3_ml.txt", "r").read()
+    file = open(config.MANUAL_LABLED_ASPECT_PATH + "Canon G3_ml.txt", "r").read()
     actual_product = file.split('\n')
     # print("From file", len(actual_product), actual_product)
     lemmatized = pre_processing.lemmatization(actual_product)
