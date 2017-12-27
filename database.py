@@ -18,7 +18,18 @@ def insert_into_review_table(review):
     insert_query = ("INSERT INTO review "
                     "(review)"
                     "VALUES (%s)")
+    # print(review)
     cursor.execute(insert_query, review)
+    connection.commit()
+
+def insert_domain_data_into_review_table(review):
+    truncate_sentence_table_sql = 'TRUNCATE TABLE review'
+    cursor.execute(truncate_sentence_table_sql)
+    for review_sent in review:
+        insert_query = ("INSERT INTO review "
+                        "(review)"
+                        "VALUES (%s)")
+        cursor.execute(insert_query, review_sent)
     connection.commit()
 
 
@@ -235,7 +246,7 @@ def fetch_freatures_after_compactness_pruning():
     return [x[0] for x in cursor.fetchall()]
 
 def fetch_feature_for_wikipedia_crawl():
-    select_sql = 'SELECT count(*) as ct, nouns FROM thesis.nouns_list_per_sentence group by nouns order by ct desc;'
+    select_sql = 'SELECT count(*) as ct, candidate_aspect FROM thesis.candidate_aspect group by candidate_aspect order by ct desc;'
     cursor.execute(select_sql)
     entity = cursor.fetchone()
     return entity[1]
@@ -351,3 +362,19 @@ def fetch_sentnece_by_id(sent_id):
     sql_query = "SELECT sentence FROM thesis.sentences WHERE sentences_id = " + sent_id + ";"
     cursor.execute(sql_query)
     return cursor.fetchall()
+
+
+def insert_final_product_aspect_list(product_aspects_list_final):
+    trucate_table('product_aspects')
+    for aspect in product_aspects_list_final:
+        insert_query = ("INSERT INTO product_aspects "
+                        "(aspect)"
+                        "VALUES (%s)")
+        cursor.execute(insert_query, aspect)
+    connection.commit()
+
+
+def fetch_final_product_aspect_list():
+    select_sql = 'SELECT aspect FROM thesis.product_aspects;'
+    cursor.execute(select_sql)
+    return [x[0] for x in cursor.fetchall()]

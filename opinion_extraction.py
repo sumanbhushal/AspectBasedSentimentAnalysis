@@ -119,7 +119,7 @@ def extract_opinion_of_aspect_using_lexicon():
     positive_lexicon = read_lexicon(config.LEXICONS_PATH + "positive-words.txt")
     negative_lexicon = read_lexicon(config.LEXICONS_PATH + "negative-words.txt")
     # features_list = ['lens', 'zoom', 'battery life', 'picture', 'canon', 'g3']
-    features_list = database.fetch_freatures_after_compactness_pruning()
+    features_list = database.fetch_final_product_aspect_list()
     # print(len(features_list), features_list)
 
     lex_list = []
@@ -187,7 +187,7 @@ def extract_opinion_of_aspect_using_lexicon():
                 opinion_word = o_word
 
                 if(feature_word_and_position):
-                    print(feature_word_and_position)
+                    # print(feature_word_and_position)
                     for p_word, p_tag, p_index in feature_word_and_position:
                         feature_position = p_index
                         feature_word = p_word
@@ -221,7 +221,7 @@ def extract_opinion_of_aspect_using_lexicon():
                                 if (sent_in_freq_tag == True):
                                     feature_opinion_sent = (feature_word, opinion_word, o_tag, sent_id)
                                     sentence_containing_feature_opinion.append(feature_opinion_sent)
-    print("FEATURE", len(sentence_containing_feature_opinion), sentence_containing_feature_opinion)
+    # print("FEATURE", len(sentence_containing_feature_opinion), sentence_containing_feature_opinion)
     return sentence_containing_feature_opinion
 
 def read_lexicon(path):
@@ -276,7 +276,7 @@ def genearte_summary_feature_opinion():
     feature_score_dict = {}
     for feature, opinion, o_tag, sent_id in feature_opinion_sent_list:
         opinion_tag = get_wordnet_pos(o_tag)
-        negation(str(sent_id))
+        # negation(str(sent_id))
 
         syns = wordnet.synsets(opinion)
 
@@ -494,45 +494,6 @@ def get_wordnet_pos(opinion_tag):
         return 'r'
     else:
         return None
-
-def plot_in_graph():
-    feature_score_dict = {'g3': {'Score': {'pos': 1, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [14], 'neg_id': [], 'neu_id': []}},
-               'zoom': {'Score': {'pos': 1, 'neg': 2, 'neu': 2}, 'Sentence_id': {'pos_id': [53], 'neg_id': [163, 263], 'neu_id': [63, 363]}},
-               'battery': {'Score': {'pos': 3, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [57, 157, 257], 'neg_id': [], 'neu_id': []}},
-               'pictures': {'Score': {'pos': 1, 'neg': 0, 'neu': 0}, 'Sentence_id': {'pos_id': [61], 'neg_id': [], 'neu_id': []}}}
-    features = []
-    for feature_key, feature_values in feature_score_dict.items():
-        pos, neg, neu = 0,0,0
-        pos_sentences = []
-        neg_sentences = []
-        neu_sentences = []
-        features.append(feature_key)
-        # print(feature_key, feature_values)
-        for s_key, s_value in feature_values.items():
-            # print(s_key, s_value)
-
-            if s_key == 'Score':
-                for score_key, score_value in s_value.items():
-                    if score_key == 'pos':
-                        pos = score_value
-                    if score_key == 'neg':
-                        neg = score_value
-                    if score_key == 'neu':
-                        neu = score_value
-            if s_key == 'Sentence_id':
-                for sent_id_key, sent_id_value in s_value.items():
-                    if sent_id_key == 'pos_id':
-                        pos_sentences = sent_id_value
-                    if sent_id_key == 'neg_id':
-                        neg_sentences = sent_id_value
-                    if sent_id_key == 'neu_id':
-                        neu_sentences = sent_id_value
-
-        print("Feature = ", feature_key, "Positive = ", pos, "Negative = ", neg, "Neutral = ", neu,
-              "Positive Sentence ", pos_sentences,
-              "Negative sentence ", neg_sentences,
-              "Neutral Sentence ", neu_sentences)
-
 
 def negation(sentence_id):
     print(sentence_id)

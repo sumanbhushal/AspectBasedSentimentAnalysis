@@ -17,8 +17,10 @@ def extract_manual_annotated_aspect(filename, review_list):
 
     new_list = []
     for word, count in manual_labeled_product_aspect:
-            msc.write_to_file(filename + "_ml.txt", word + '\n')
-            new_list.append(word)
+        combine = (word, count)
+        new_list.append(combine)
+        # msc.write_to_file(filename + "_ml_with_count.txt", word + '\n')
+    msc.write_to_file(filename + "_ml_with_count.txt", str(new_list))
     print("Mannual Labeled data", len(new_list), new_list)
 
 
@@ -35,30 +37,28 @@ def extract_manual_annotated_asp_min_rev_sent_count(filename, review_list):
     print("Mannual Labeled data With Sentence Count", len(new_list), new_list)
 
 def main():
-    review_list = read_file()
+    # review_list = read_file()
 
     """Extract each sentence from review, pre-process and store in database"""
     # sentence_list = database.fetch_sentences_from_review(review_list)
-    # sentence_list = database.fetch_sentence_from_sentence_table()
+    sentence_list = database.fetch_sentence_from_sentence_table()
 
     """Extract Manual annotated aspect also with minimum sentence count """
     # extract_manual_annotated_aspect("Canon G3", review_list)
     # extract_manual_annotated_asp_min_rev_sent_count("Canon G3", review_list)
 
     """Stanford POS tagging and storing in database"""
-    # pos_tagging.stanford_pos_tagging(sentence_list)
+    pos_tagging.stanford_pos_tagging(sentence_list)
 
     """Extracting Nouns, Noun phrases and Adjective-Noun phrases and store in database as transaction"""
-    # noun_nounphrases_per_sent = product_aspects_extraction.noun_chunking_for_stanford_pos()
+    noun_nounphrases_per_sent = product_aspects_extraction.noun_chunking_for_stanford_pos()
 
     """Apriori algorithim for frequent itemsets"""
     # cbs_apriori.cbs_apriori_itemset()
     frequent_itemsets = cbs_apriori.frequent_itemset_from_db()
-    # print(len(frequent_itemsets), frequent_itemsets)
 
     """Wikipedia Crawling to get the product aspects"""
     domain_name, wiki_feature_list = wikipedia_crawler.product_features_from_wikipedia()
-    # print("wiki", len(wiki_feature_list), wiki_feature_list)
 
     """Aspect Pruning (Compactness pruning, Redundancy pruning)"""
     aspect_pruning.compactness_pruning()
@@ -76,13 +76,13 @@ def main():
     product_aspects_list_final = []
     for product_asp in final_feature_list:
         product_aspects_list_final.append(" ".join(product_asp.split("_")))
-    print("Final list", len(product_aspects_list_final), product_aspects_list_final)
-
+    # print("Final list", len(product_aspects_list_final), product_aspects_list_final)
+    database.insert_final_product_aspect_list(product_aspects_list_final)
 
     """Evaluations"""
-    # precision = evaluation_matrix.precision(final_feature_list)
-    # recall = evaluation_matrix.recall(final_feature_list)
-    # f_measure = evaluation_matrix.f_measure(precision, recall)
+    precision = evaluation_matrix.precision(final_feature_list)
+    recall = evaluation_matrix.recall(final_feature_list)
+    f_measure = evaluation_matrix.f_measure(precision, recall)
 
     # ### Extracting Opinion and Generating Opinion summary
     # # op_list = opinion_extraction.extract_opinon_of_feature(pos_tagged_sentences_list)
