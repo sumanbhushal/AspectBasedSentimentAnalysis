@@ -2,8 +2,9 @@ from nltk.corpus import wordnet
 
 
 def similarity_grouping(aspect, aspect_list):
+    new_list_without_aspect = [a for a in aspect_list if a not in aspect]
     aspect_word = aspect + ".n.01"
-    new_list_without_aspect = [a for a in aspect_list if a not in aspect_word]
+    # new_list_without_aspect = [a for a in aspect_list if a not in aspect_word]
     for asp in new_list_without_aspect:
         try:
             w1 = wordnet.synset(aspect_word)
@@ -15,3 +16,10 @@ def similarity_grouping(aspect, aspect_list):
                 return asp
         except:
             pass
+
+def redundent_grouping(aspect, aspect_list):
+    new_list_without_aspect = [a for a in aspect_list if a not in aspect]
+    for list_asp in new_list_without_aspect:
+        if aspect in list_asp.split():
+            # print(aspect, "=> ", list_asp)
+            return list_asp

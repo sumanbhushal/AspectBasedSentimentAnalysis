@@ -1,8 +1,9 @@
 import nltk, database, config
+from nltk import word_tokenize
 from nltk.corpus import wordnet
 from nltk.corpus import sentiwordnet
 import aspect_grouping
-
+from itertools import combinations
 
 def extract_opinon_of_feature(pos_tagged_sentence_list):
     features_list = ['adjustment']
@@ -115,8 +116,22 @@ def extract_opinion_of_aspect_using_lexicon():
     positive_lexicon = read_lexicon(config.LEXICONS_PATH + "positive-words.txt")
     negative_lexicon = read_lexicon(config.LEXICONS_PATH + "negative-words.txt")
     # features_list = ['camera', 'photo', 'picture quality', 'picture', 'image']
-    features_list = database.fetch_final_product_aspect_list()
-    # print(len(features_list), features_list)
+    features_list_database = database.fetch_final_product_aspect_list()
+    features_list = []
+    for f in features_list_database:
+        if len(f.split()) == 1 and f not in features_list:
+            features_list.append(f)
+        else:
+            test_list = []
+            for i in range(len(f.split())):
+                combine = combinations(f.split(), i+1)
+                for c in combine:
+                    test_list.append(" ".join(c))
+
+            for asp in test_list:
+                if asp not in features_list:
+                    features_list.append(asp)
+    # print("Feature List Final", features_list)
 
     lex_list = []
     for pos_lex in positive_lexicon:
@@ -154,7 +169,7 @@ def extract_opinion_of_aspect_using_lexicon():
                 else:
                     complete_word = ''
                     for i in range(len(feature.split())):
-                        # print("Feature", feature)
+                        # print("Feature:", i, feature.split()[i])
                         if feature.split()[i] == word:
                             if prev_word != '':
                                 current_word = prev_word + ' ' + feature.split()[i]
@@ -272,7 +287,11 @@ def genearte_summary_feature_opinion():
     feature_score_dict = {}
     for feature, opinion, o_tag, sent_id in feature_opinion_sent_list:
         opinion_tag = get_wordnet_pos(o_tag)
-        # negation(str(sent_id))
+        negation = is_negation(str(sent_id))
+        # if not negation:
+        #     print("No negative sentence")
+        # else:
+        #     print("Sentect id", negation)
 
         syns = wordnet.synsets(opinion)
 
@@ -302,52 +321,97 @@ def genearte_summary_feature_opinion():
             each_word_orientation = sentiwordnet.senti_synset(tag_synset_name[0])
             # print(feature, each_word_orientation, sent_id, each_word_orientation.pos_score(), each_word_orientation.neg_score())
             if each_word_orientation.pos_score() != 0 and each_word_orientation.neg_score() == 0:
-                for f_key, f_value in feature_score_dict[feature].items():
-                    if f_key == 'Score':
-                        for score_key, score_value in f_value.items():
-                            if score_key == 'pos':
-                                if score_value:
-                                    pos = score_value
-                                    pos += 1
-                                else:
-                                    pos += 1
-                    if f_key == 'Sentence_id':
-                        for s_key, s_value in f_value.items():
-                            if s_key == 'pos_id':
-                                if s_value:
-                                    sentence_id = s_value
-                                    # sentence_id = list(str(s_value).split(','))
-                                    sentence_id.append(sent_id)
-                                    break
-                                else:
-                                    sentence_id.append(sent_id)
+                if not negation:
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'pos':
+                                    if score_value:
+                                        pos = score_value
+                                        pos += 1
+                                    else:
+                                        pos += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'pos_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
+                    feature_score_dict[feature]['Score']['pos'] = pos
+                    feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+                else:
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'neg':
+                                    if score_value:
+                                        neg = score_value
+                                        neg += 1
+                                    else:
+                                        neg += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'neg_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
 
-                feature_score_dict[feature]['Score']['pos'] = pos
-                feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
+                    feature_score_dict[feature]['Score']['neg'] = neg
+                    feature_score_dict[feature]['Sentence_id']['neg_id'] = sentence_id
             # For Negative
             elif each_word_orientation.neg_score() != 0 and each_word_orientation.pos_score() == 0:
-                for f_key, f_value in feature_score_dict[feature].items():
-                    if f_key == 'Score':
-                        for score_key, score_value in f_value.items():
-                            if score_key == 'neg':
-                                if score_value:
-                                    neg = score_value
-                                    neg += 1
-                                else:
-                                    neg += 1
-                    if f_key == 'Sentence_id':
-                        for s_key, s_value in f_value.items():
-                            if s_key == 'neg_id':
-                                if s_value:
-                                    sentence_id = s_value
-                                    # sentence_id = list(str(s_value).split(','))
-                                    sentence_id.append(sent_id)
-                                    break
-                                else:
-                                    sentence_id.append(sent_id)
-
-                feature_score_dict[feature]['Score']['neg'] = neg
-                feature_score_dict[feature]['Sentence_id']['neg_id'] = sentence_id
+                if not negation:
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'neg':
+                                    if score_value:
+                                        neg = score_value
+                                        neg += 1
+                                    else:
+                                        neg += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'neg_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
+                    feature_score_dict[feature]['Score']['neg'] = neg
+                    feature_score_dict[feature]['Sentence_id']['neg_id'] = sentence_id
+                else:
+                    for f_key, f_value in feature_score_dict[feature].items():
+                        if f_key == 'Score':
+                            for score_key, score_value in f_value.items():
+                                if score_key == 'pos':
+                                    if score_value:
+                                        pos = score_value
+                                        pos += 1
+                                    else:
+                                        pos += 1
+                        if f_key == 'Sentence_id':
+                            for s_key, s_value in f_value.items():
+                                if s_key == 'pos_id':
+                                    if s_value:
+                                        sentence_id = s_value
+                                        # sentence_id = list(str(s_value).split(','))
+                                        sentence_id.append(sent_id)
+                                        break
+                                    else:
+                                        sentence_id.append(sent_id)
+                    feature_score_dict[feature]['Score']['pos'] = pos
+                    feature_score_dict[feature]['Sentence_id']['pos_id'] = sentence_id
             # For neutral
             elif each_word_orientation.pos_score() == 0 and each_word_orientation.neg_score() == 0:
                 for f_key, f_value in feature_score_dict[feature].items():
@@ -446,6 +510,7 @@ def genearte_summary_feature_opinion():
 
     # print(len(feature_score_dict),feature_score_dict)
     aspect_list_for_grouping = []
+    aspect_after_similarity_grouping = {}
     final_aspect_after_grouping = {}
     for feature_key, feature_values in feature_score_dict.items():
         aspect_list_for_grouping.append(feature_key)
@@ -509,13 +574,89 @@ def genearte_summary_feature_opinion():
                 Sentence_id['neg_id'] = new_neg_sentences
                 Sentence_id['neu_id'] = new_neu_sentences
 
+                aspect_after_similarity_grouping[feature_key] = {}
+                aspect_after_similarity_grouping[feature_key]['Score'] = Score
+                aspect_after_similarity_grouping[feature_key]['Sentence_id'] = Sentence_id
+                aspect_list_for_grouping.remove(similar_aspect)
+            else:
+                aspect_after_similarity_grouping[feature_key] = feature_values
+
+            """
+                Redundant Grouping (picture = > picture quality)
+     
+            """
+    aspect_list_after_similarity_grouping = []
+    final_aspect_after_grouping = {}
+    for feature_key, feature_values in aspect_after_similarity_grouping.items():
+        aspect_list_after_similarity_grouping.append(feature_key)
+
+    for feature_key, feature_values in aspect_after_similarity_grouping.items():
+        if(feature_key in aspect_list_after_similarity_grouping):
+            redundent_aspect = aspect_grouping.redundent_grouping(feature_key, aspect_list_after_similarity_grouping)
+            if (redundent_aspect):
+                # print(redundent_aspect, "=>", feature_key)
+                redundent_aspect_value_to_append = aspect_after_similarity_grouping.get(redundent_aspect)
+                # print(redundent_aspect, "=>", redundent_aspect_value_to_append)
+                new_pos_value, new_neg_value, new_neu_value = 0, 0, 0
+                new_pos_sentences = []
+                new_neg_sentences = []
+                new_neu_sentences = []
+                Score = {}
+                Sentence_id = {}
+
+                for s_key, s_value in feature_values.items():
+                    # print(s_key, s_value)
+                    if s_key == 'Score':
+                        for score_key, score_value in s_value.items():
+                            if score_key == 'pos':
+                                new_pos_value = score_value
+                            if score_key == 'neg':
+                                new_neg_value = score_value
+                            if score_key == 'neu':
+                                new_neu_value = score_value
+                    if s_key == 'Sentence_id':
+                        for sent_id_key, sent_id_value in s_value.items():
+                            if sent_id_key == 'pos_id':
+                                new_pos_sentences.extend(sent_id_value)
+                            if sent_id_key == 'neg_id':
+                                new_neg_sentences.extend(sent_id_value)
+                            if sent_id_key == 'neu_id':
+                                new_neu_sentences.extend(sent_id_value)
+                for s_key, s_value in redundent_aspect_value_to_append.items():
+                    # print(s_key, s_value)
+                    if s_key == 'Score':
+                        for score_key, score_value in s_value.items():
+                            if score_key == 'pos':
+                                new_pos_value = new_pos_value + score_value
+                            if score_key == 'neg':
+                                new_neg_value = new_neg_value + score_value
+                            if score_key == 'neu':
+                                new_neu_value = new_neu_value + score_value
+                    if s_key == 'Sentence_id':
+                        for sent_id_key, sent_id_value in s_value.items():
+                            if sent_id_key == 'pos_id':
+                                new_pos_sentences.extend(sent_id_value)
+                            if sent_id_key == 'neg_id':
+                                new_neg_sentences.extend(sent_id_value)
+                            if sent_id_key == 'neu_id':
+                                new_neu_sentences.extend(sent_id_value)
+                # print("New values", new_pos_value, new_neg_value, new_neu_value)
+                # print("New Sentence values", new_pos_sentences, new_neg_sentences, new_neu_sentences)
+                Score['pos'] = new_pos_value
+                Score['neg'] = new_neg_value
+                Score['neu'] = new_neu_value
+                Sentence_id['pos_id'] = new_pos_sentences
+                Sentence_id['neg_id'] = new_neg_sentences
+                Sentence_id['neu_id'] = new_neu_sentences
+
                 final_aspect_after_grouping[feature_key] = {}
                 final_aspect_after_grouping[feature_key]['Score'] = Score
                 final_aspect_after_grouping[feature_key]['Sentence_id'] = Sentence_id
-                aspect_list_for_grouping.remove(similar_aspect)
+                aspect_list_after_similarity_grouping.remove(redundent_aspect)
             else:
                 final_aspect_after_grouping[feature_key] = feature_values
-    # print("AFTER Grouping", len(final_aspect_after_grouping),final_aspect_after_grouping)
+    print("AFTER REDUNDET Grouping", len(final_aspect_after_grouping),final_aspect_after_grouping)
+
 
     for feature_key, feature_values in final_aspect_after_grouping.items():
         pos, neg, neu = 0,0,0
@@ -560,22 +701,30 @@ def get_wordnet_pos(opinion_tag):
     else:
         return None
 
-def negation():
+def is_negation(sentence_id):
     # sentence_id = [2, 9, 70, 71, 81, 90, 123, 129, 132, 215, 224, 277, 283, 286, 303,
     #                368, 387, 392, 442, 466, 475, 485, 531, 579, 593]
-    sentence_id = 2
-    print(sentence_id)
+    # sentence_id = '449'
+    # print(sentence_id)
     sentence = database.fetch_sentnece_by_id(sentence_id)
-    print(sentence)
+    # print(" ".join(str(x) for x in sentence))
+    word_tokenize_sent = word_tokenize(" ".join(str(x) for x in sentence))
+    # print(word_tokenize_sent)
     negative_word_list = ["aint", "arent", "cannot", "cant", "couldnt", "darent", "didnt", "doesnt",
                           "ain’t", "aren’t", "can’t", "couldn’t", "daren’t", "didn’t", "doesn’t",
                           "dont", "hadnt", "hasnt", "havent", "isnt", "mightnt","mustnt", "neither",
                           "don’t", "hadn’t", "hasn’t", "haven’t", "isn’t", "mightn’t", "mustn’t", "neednt", "needn’t",
                           "never", "none", "nope", "nor", "not", "nothing", "nowhere", "oughtnt", "shant", "shouldnt",
                           "uhuh", "wasnt", "werent", "oughtn’t", "shan’t", "shouldn’t", "uhuh",
-                          "wasn’t", "weren’t", "without", "wont", "wouldnt", "won’t", "wouldn’t", "rarely", "seldom", "despite"]
+                          "wasn’t", "weren’t", "without", "wont", "wouldnt", "won’t", "wouldn’t", "rarely", "seldom", "despite", "n't"]
+
+    for word in word_tokenize_sent:
+        for neg_word in negative_word_list:
+            if word == neg_word:
+                return True
+
 # extract_opinion_of_aspect_using_lexicon()
 
 # print(sentiwordnet.senti_synset("astounding.a.01"))
-# genearte_summary_feature_opinion()
-negation()
+genearte_summary_feature_opinion()
+# is_negation()
