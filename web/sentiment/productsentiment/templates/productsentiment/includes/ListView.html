@@ -2,15 +2,15 @@
 {% for feature in asepct_structure_summary %}
     <h5>{{ feature.product_aspect }}</h5>
     <ul class="list-group">
-      <a href="{{ feature.product_aspect }}/positive" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">
+      <a href="{{ feature.product_aspect }}" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">
         Positive
         <span class="badge badge-primary badge-pill">{{ feature.pos_score }}</span>
       </a>
-      <a href="{{ feature.name }}/negative" class="list-group-item d-flex justify-content-between align-items-center list-group-item-danger">
+      <a href="{{ feature.name }}" class="list-group-item d-flex justify-content-between align-items-center list-group-item-danger">
         Negative
         <span class="badge badge-primary badge-pill">{{ feature.neg_score }}</span>
       </a>
-      <a href="{{ feature.name }}/neutral" class="list-group-item d-flex justify-content-between align-items-center list-group-item-success">
+      <a href="{{ feature.name }}" class="list-group-item d-flex justify-content-between align-items-center list-group-item-success">
         Neutral
         <span class="badge badge-primary badge-pill">{{ feature.neu_score }}</span>
       </a>

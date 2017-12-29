@@ -1,3 +1,39 @@
+{% extends "productsentiment/header.html"  %}
 {% block content %}
-<h1>HI</h1>
+    <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-11 order-1" style="margin-left: 25px;"><br/>
+            <h3 class="text-info" style="text-transform: capitalize;">{{ aspect_details.product_aspect }} Details</h3><br/>
+              <div class="card">
+                  <h3 class="card-header text-white bg-primary">Positive Sentence
+                      <span style="float: right">Score: {{ aspect_details.pos_score }}</span></h3>
+                      <ul class="list-group list-group-flush">
+                          {% for pos_sent in pos_sentence %}
+                               <li class="list-group-item" > &#1422; {{ pos_sent }}</li>
+                          {% endfor %}
+                      </ul>
+              </div>
+
+              <div class="card">
+                  <h3 class="card-header text-white bg-danger">Negative Sentence
+                  <span style="float: right">Score: {{ aspect_details.neg_score }}</span></h3>
+                  <ul class="list-group list-group-flush">
+                      {% for neg_sent in neg_sentence %}
+                           <li class="list-group-item"> &#1422; {{ neg_sent }}</li>
+                      {% endfor %}
+                  </ul>
+              </div>
+
+              <div class="card">
+                  <h3 class="card-header text-white bg-success">Neutral Sentence
+                  <span style="float: right">Score: {{ aspect_details.neu_score }}</span></h3>
+                  <ul class="list-group list-group-flush">
+                      {% for neu_sent in neu_sentence %}
+                           <li class="list-group-item"> &#1422; {{ neu_sent }}</li>
+                      {% endfor %}
+                  </ul>
+              </div>
+          </div>
+        </div>
+    </div>
 {% endblock %}

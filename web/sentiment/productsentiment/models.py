@@ -258,6 +258,8 @@ class Sentences(models.Model):
         managed = False
         db_table = 'sentences'
 
+    def __str__(self):
+        return u'%s' % (self.sentence)
 
 class SentimentAnalysis(models.Model):
     id = models.IntegerField(blank=False, null=False, primary_key=True)
