@@ -4,8 +4,8 @@
 
 
 var word_list = [
-   {% for feature in Product_feature_list %}
-        {text: "{{ feature.name|safe }}", weight: {{ feature.positive |safe }}, link: "http:{{ feature.name|safe }}"},
+   {% for feature in aspect_tag_cloud %}
+        {text: "{{ feature.product_aspect|safe }}", weight: {{ feature.pos_score |safe }}, link: "http:{{ feature.id|safe }}"},
     {% endfor %}
 ];
 $(document).ready(function() {

@@ -18,8 +18,18 @@ def similarity_grouping(aspect, aspect_list):
             pass
 
 def redundent_grouping(aspect, aspect_list):
-    new_list_without_aspect = [a for a in aspect_list if a not in aspect]
-    for list_asp in new_list_without_aspect:
-        if aspect in list_asp.split():
-            # print(aspect, "=> ", list_asp)
-            return list_asp
+    new_list_without_aspect = [a for a in aspect_list if a != aspect]
+    if(len(aspect.split())>1):
+        match_aspect = []
+        for word in aspect.split():
+            for list_asp in new_list_without_aspect:
+                if word == list_asp:
+                    match_aspect.append(list_asp)
+        return match_aspect
+                    # print(aspect, "=> ", list_asp)
+    #         if word in new_list_without_aspect:
+    #             return
+    # for list_asp in new_list_without_aspect:
+    #     if aspect in list_asp.split():
+    #         # print(aspect, "=> ", list_asp)
+    #         return list_asp

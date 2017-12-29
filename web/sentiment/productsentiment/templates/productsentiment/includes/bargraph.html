@@ -2,25 +2,27 @@
 
 <canvas id="BarGraph"></canvas>
 
-
+<!--{% for post in aspect_bar_graph %}-->
+		<!--<h5>{{ post.id }} {{ post.product_aspect }} {{post.pos_score }}{{post.pos_sent_ids}}</h5>-->
+<!--{% endfor %}-->
 <script>
     var content = document.getElementById("BarGraph").getContext("2d");
 
     var data = {
 
-      labels: {{ Product_feature |safe }},
+      labels: [{% for l in aspect_bar_graph %} "{{ l.product_aspect }}", {% endfor %}],
       datasets: [{
         label: "Positve",
         backgroundColor: "#71b2fa",
-        data: {{ Positive_values }}
+        data: [{% for s in aspect_bar_graph %} "{{ s.pos_score }}", {% endfor %}]
       }, {
         label: "Negative",
         backgroundColor: "#f07481",
-        data: {{ Negative_values }}
+        data: [{% for s in aspect_bar_graph %} "{{ s.neg_score }}", {% endfor %}]
       }, {
         label: "Neutral",
         backgroundColor: "#72e48c",
-        data: {{ Neutral_values }}
+        data: [{% for s in aspect_bar_graph %} "{{ s.neu_score }}", {% endfor %}]
       }]
     };
 

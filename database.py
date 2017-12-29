@@ -378,3 +378,16 @@ def fetch_final_product_aspect_list():
     select_sql = 'SELECT aspect FROM thesis.product_aspects;'
     cursor.execute(select_sql)
     return [x[0] for x in cursor.fetchall()]
+
+
+def insert_sentiment_analysis_result(sentiment_analysis_result_insert_into_db):
+    trucate_table('sentiment_analysis')
+    for aspect in sentiment_analysis_result_insert_into_db:
+        # print(str(aspect[4]).strip('[]'))
+        insert_value = (aspect[0], aspect[1], aspect[2], aspect[3], str(aspect[4]).strip('[]'), str(aspect[5]).strip('[]'), str(aspect[6]).strip('[]'))
+        insert_query = ("INSERT INTO sentiment_analysis "
+                        "(product_aspect, pos_score, neg_score, neu_score, pos_sent_ids, neg_sent_ids, neu_sent_ids)"
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s)")
+        cursor.execute(insert_query, insert_value)
+    connection.commit()
+

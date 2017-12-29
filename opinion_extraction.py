@@ -581,28 +581,34 @@ def genearte_summary_feature_opinion():
             else:
                 aspect_after_similarity_grouping[feature_key] = feature_values
 
-            """
-                Redundant Grouping (picture = > picture quality)
-     
-            """
+    """
+        Redundant Grouping (picture = > picture quality)
+
+    """
+    sorted_dictionary = {}
+    for data in sorted(aspect_after_similarity_grouping, key=lambda x: len(x), reverse=True):
+        sorted_dictionary[data] = aspect_after_similarity_grouping[data]
+
+    # print("Sorted by key", sorted_dictionary)
     aspect_list_after_similarity_grouping = []
     final_aspect_after_grouping = {}
-    for feature_key, feature_values in aspect_after_similarity_grouping.items():
+    for feature_key, feature_values in sorted(sorted_dictionary.items()):
         aspect_list_after_similarity_grouping.append(feature_key)
 
-    for feature_key, feature_values in aspect_after_similarity_grouping.items():
+
+    for feature_key, feature_values in sorted_dictionary.items():
         if(feature_key in aspect_list_after_similarity_grouping):
             redundent_aspect = aspect_grouping.redundent_grouping(feature_key, aspect_list_after_similarity_grouping)
             if (redundent_aspect):
                 # print(redundent_aspect, "=>", feature_key)
-                redundent_aspect_value_to_append = aspect_after_similarity_grouping.get(redundent_aspect)
-                # print(redundent_aspect, "=>", redundent_aspect_value_to_append)
                 new_pos_value, new_neg_value, new_neu_value = 0, 0, 0
                 new_pos_sentences = []
                 new_neg_sentences = []
                 new_neu_sentences = []
                 Score = {}
                 Sentence_id = {}
+
+                # print(redundent_aspect, "=>", redundent_aspect_value_to_append)
 
                 for s_key, s_value in feature_values.items():
                     # print(s_key, s_value)
@@ -622,42 +628,47 @@ def genearte_summary_feature_opinion():
                                 new_neg_sentences.extend(sent_id_value)
                             if sent_id_key == 'neu_id':
                                 new_neu_sentences.extend(sent_id_value)
-                for s_key, s_value in redundent_aspect_value_to_append.items():
-                    # print(s_key, s_value)
-                    if s_key == 'Score':
-                        for score_key, score_value in s_value.items():
-                            if score_key == 'pos':
-                                new_pos_value = new_pos_value + score_value
-                            if score_key == 'neg':
-                                new_neg_value = new_neg_value + score_value
-                            if score_key == 'neu':
-                                new_neu_value = new_neu_value + score_value
-                    if s_key == 'Sentence_id':
-                        for sent_id_key, sent_id_value in s_value.items():
-                            if sent_id_key == 'pos_id':
-                                new_pos_sentences.extend(sent_id_value)
-                            if sent_id_key == 'neg_id':
-                                new_neg_sentences.extend(sent_id_value)
-                            if sent_id_key == 'neu_id':
-                                new_neu_sentences.extend(sent_id_value)
-                # print("New values", new_pos_value, new_neg_value, new_neu_value)
-                # print("New Sentence values", new_pos_sentences, new_neg_sentences, new_neu_sentences)
-                Score['pos'] = new_pos_value
-                Score['neg'] = new_neg_value
-                Score['neu'] = new_neu_value
-                Sentence_id['pos_id'] = new_pos_sentences
-                Sentence_id['neg_id'] = new_neg_sentences
-                Sentence_id['neu_id'] = new_neu_sentences
+                for aspect in redundent_aspect:
+                    redundent_aspect_value_to_append = sorted_dictionary.get(aspect)
+
+                    for s_key, s_value in redundent_aspect_value_to_append.items():
+                        # print(s_key, s_value)
+                        if s_key == 'Score':
+                            for score_key, score_value in s_value.items():
+                                if score_key == 'pos':
+                                    new_pos_value = new_pos_value + score_value
+                                if score_key == 'neg':
+                                    new_neg_value = new_neg_value + score_value
+                                if score_key == 'neu':
+                                    new_neu_value = new_neu_value + score_value
+                        if s_key == 'Sentence_id':
+                            for sent_id_key, sent_id_value in s_value.items():
+                                if sent_id_key == 'pos_id':
+                                    new_pos_sentences.extend(sent_id_value)
+                                if sent_id_key == 'neg_id':
+                                    new_neg_sentences.extend(sent_id_value)
+                                if sent_id_key == 'neu_id':
+                                    new_neu_sentences.extend(sent_id_value)
+                    # print("New values", new_pos_value, new_neg_value, new_neu_value)
+                    # print("New Sentence values", new_pos_sentences, new_neg_sentences, new_neu_sentences)
+                        Score['pos'] = new_pos_value
+                        Score['neg'] = new_neg_value
+                        Score['neu'] = new_neu_value
+
+                    Sentence_id['pos_id'] = new_pos_sentences
+                    Sentence_id['neg_id'] = new_neg_sentences
+                    Sentence_id['neu_id'] = new_neu_sentences
+                    aspect_list_after_similarity_grouping.remove(aspect)
 
                 final_aspect_after_grouping[feature_key] = {}
                 final_aspect_after_grouping[feature_key]['Score'] = Score
                 final_aspect_after_grouping[feature_key]['Sentence_id'] = Sentence_id
-                aspect_list_after_similarity_grouping.remove(redundent_aspect)
             else:
                 final_aspect_after_grouping[feature_key] = feature_values
-    print("AFTER REDUNDET Grouping", len(final_aspect_after_grouping),final_aspect_after_grouping)
 
+    # print("AFTER REDUNDET Grouping", len(final_aspect_after_grouping),final_aspect_after_grouping)
 
+    sentiment_analysis_result_insert_into_db = []
     for feature_key, feature_values in final_aspect_after_grouping.items():
         pos, neg, neu = 0,0,0
         pos_sentences = []
@@ -682,12 +693,16 @@ def genearte_summary_feature_opinion():
                         neg_sentences = sent_id_value
                     if sent_id_key == 'neu_id':
                         neu_sentences = sent_id_value
+        all_value_per_aspect = (feature_key, pos, neg, neu, pos_sentences, neg_sentences, neu_sentences)
+        sentiment_analysis_result_insert_into_db.append(all_value_per_aspect)
 
         print("Feature = ", feature_key, "Positive = ", pos, "Negative = ", neg, "Neutral = ", neu,
               "Positive Sentence ", pos_sentences,
               "Negative sentence ", neg_sentences,
               "Neutral Sentence ", neu_sentences)
 
+    database.insert_sentiment_analysis_result(sentiment_analysis_result_insert_into_db)
+    # print(sentiment_analysis_result_insert_into_db)
 def get_wordnet_pos(opinion_tag):
 
     if opinion_tag in ['JJ', 'JJR', 'JJS']:
@@ -727,4 +742,3 @@ def is_negation(sentence_id):
 
 # print(sentiwordnet.senti_synset("astounding.a.01"))
 genearte_summary_feature_opinion()
-# is_negation()
