@@ -2,12 +2,24 @@ import urllib.request
 import re, database, pre_processing
 from nltk.corpus import wordnet
 
+
 def wiki_crawler(entity_name):
+    """
+    Creating url for Wikipedia Crawling
+    :param entity_name: Name of entity
+    :return: return list of candidate aspects from Wikipedia
+    """
     base_url = 'https://en.wikipedia.org/wiki'
     entity_url = base_url + '/' + entity_name
     return extract_internal_link(entity_url)
 
+
 def extract_internal_link(entity_url):
+    """
+    Extracting internal links from Wekipedia and retrieving candidate aspects from internal link
+    :param entity_url: url refering Wekipedia
+    :return: candidate aspects list
+    """
     try:
         internal_link_word = []
         word_dict = {}
@@ -16,10 +28,11 @@ def extract_internal_link(entity_url):
         final_list = []
         # print(request_data)
 
+        # Extracting only internal link with the help of regular expression
         rg_exp_link = re.compile('(<a\\s+href="\\/wiki\\/\\w*?")', re.IGNORECASE | re.DOTALL)
-
         internal_link_list = re.findall(rg_exp_link, request_data)
-        # print(internal_link_list)
+
+        # Retrieving candidate aspects from internal link
         for link in internal_link_list:
             rg_exp_word = re.compile('(<a\\s+href="\\/wiki\\/)', re.IGNORECASE | re.DOTALL)
             word_without_link = re.sub(rg_exp_word, '', link)
@@ -29,7 +42,7 @@ def extract_internal_link(entity_url):
             internal_link_word.append(final_word_list)
 
         for word in internal_link_word:
-            if(word_dict.keys()!= word):
+            if word_dict.keys() != word:
                 word_dict[word] = internal_link_word.count(word)
 
         for key, value in word_dict.items():
@@ -39,8 +52,13 @@ def extract_internal_link(entity_url):
     except Exception as e:
         print(str(e))
 
+
 def product_features_from_wikipedia():
-    # wikipedia Crawler
+    """
+    Get Entity from database and use it to crawl wikipeida
+    Compare the candidate aspects with Wikipedia aspect list
+    :return: entity name, genuine aspect list
+    """
     entity_name = database.fetch_feature_for_wikipedia_crawl()
     noun_nounphrases_per_sent = database.fetch_noun_nounphrase()
     extracted_noun_nounphrases = []
@@ -49,29 +67,39 @@ def product_features_from_wikipedia():
         rg_exp_replace_space = re.compile('(\\s+)', re.IGNORECASE | re.DOTALL)
         aspect_replacing_space_with_underscore = re.sub(rg_exp_replace_space, '_', aspect)
         extracted_noun_nounphrases.append(aspect_replacing_space_with_underscore)
-    wiki_list = wiki_crawler(entity_name)
 
+    wiki_list = wiki_crawler(entity_name)
+    wiki_feature_after_lemmatization = pre_processing.lemmatization(wiki_list)
+
+    # Comparing frequent candidate aspects without aspects retrieve from Wikipedia
     exp_asp_intersection_wiki = []
     match_with_wiki_dict = {}
     for asp in extracted_noun_nounphrases:
-        for s in filter(lambda x: asp == x, wiki_list):
+        for s in filter(lambda x: asp == x, wiki_feature_after_lemmatization):
             exp_asp_intersection_wiki.append(asp)
     for asp in exp_asp_intersection_wiki:
-        if (match_with_wiki_dict.keys() != asp):
+        if match_with_wiki_dict.keys() != asp:
             match_with_wiki_dict[asp] = exp_asp_intersection_wiki.count(asp)
 
+    # Checking the length of the aspects and take those with greater than 2
     new_list = []
     for key, value in match_with_wiki_dict.items():
         if len(key) > 2:
             new_list.append(key)
 
-    feature_after_lemmatization = pre_processing.lemmatization(new_list)
-    final_wiki_list = filter_wiki_list(entity_name, feature_after_lemmatization)
+    final_wiki_list = filter_wiki_list(entity_name, new_list)
     return entity_name, final_wiki_list
 
-def filter_wiki_list(domain_name, wiki_feature_list):
+
+def filter_wiki_list(entity_name, wiki_feature_list):
+    """
+    Measuring Similarity between Entity and features
+    :param entity_name: Name of the entity
+    :param wiki_feature_list: Wikipedia feature list
+    :return: Aspect list after grouping similar aspects
+    """
     new_wiki_list = []
-    domain = domain_name + ".n.01"
+    domain = entity_name + ".n.01"
     for wiki_asp in wiki_feature_list:
         try:
             w1 = wordnet.synset(domain)
@@ -82,6 +110,4 @@ def filter_wiki_list(domain_name, wiki_feature_list):
                 new_wiki_list.append(wiki_asp)
         except:
             pass
-    # print(new_wiki_list)
     return new_wiki_list
-# print(len(wiki_crawler('phone')),wiki_crawler('phone'))

@@ -1,0 +1,21 @@
+{% block content %}
+
+<canvas id="pie-chart"></canvas>
+<script>
+    var ctx = document.getElementById("pie-chart");
+var myChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: ["Positive", "Negative", "Neutral"],
+    datasets: [{
+      backgroundColor: [
+        "#3498db",
+        "#e74c3c",
+        "#2ecc71"
+      ],
+      data: [{{ overall_positive_score.pos_score__sum }}, {{ overall_negative_score.neg_score__sum }}, {{ overall_neutral_score.neu_score__sum }}]
+    }]
+  }
+});
+</script>
+{% endblock %}

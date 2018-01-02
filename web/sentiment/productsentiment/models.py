@@ -279,6 +279,16 @@ class SentimentAnalysis(models.Model):
         return u'%s %s %s %s %s %s %s' % (self.id, self.product_aspect, self.pos_score, self.neg_score, self.neu_score,
                            self.pos_sent_ids, self.neg_sent_ids, self.neu_sent_ids)
 
+class ExecutionTime(models.Model):
+    duration = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'execution_time'
+
+    def __str__(self):
+        return u'%s' % (self.duration)
+
 class Trigrams(models.Model):
     review_id = models.IntegerField(blank=True, null=True)
     sentence_id = models.IntegerField(blank=True, null=True)

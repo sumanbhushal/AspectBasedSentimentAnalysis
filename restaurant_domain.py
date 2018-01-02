@@ -34,9 +34,6 @@ def read_dataset():
     for new_asp in new_list:
         msc.write_to_file("Restaurant_ml.txt", new_asp + '\n')
 
-
-
-
     # database.insert_domain_data_into_review_table(sentence_list)
     # database.insert_sentence_into_sentence_table()
     # sent_list_from_db = database.fetch_sentence_from_sentence_table()

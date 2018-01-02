@@ -4,10 +4,19 @@
 <section>
       <div class="container">
         <div class="row align-items-center">
-          <div class="col-md-11 order-1" style="margin-left: 25px;">
-            <div class="p-5">
-              {% include "productsentiment/includes/bargraph.html" %}
-            </div>
+          <div class="col-md-12" style="margin-left: 25px; margin-top: 20px;">
+              <div class="row">
+                <div class="col-md-5">
+                    <h3 style="text-align: center;">Overall Sentiment</h3>
+                  {% include "productsentiment/includes/pie_chart.html" %}
+                </div>
+                <div class="col-md-7">
+                    <h3 style="text-align: center;">Top 10 aspects sentiment</h3>
+                    <div style="width: 100%">
+                        {% include "productsentiment/includes/bargraph.html" %}
+                    </div>
+                </div>
+              </div>
           </div>
         </div>
       </div>
@@ -15,15 +24,14 @@
 
     <section>
       <div class="container">
-        <div class="row align-items-center">
+        <div class="row">
           <div class="col-md-6">
             <div class="p-5">
               <ul class="list-group">
-                        <li class="list-group-item">
-                            {% include "productsentiment/includes/ListView.html" %}
-                        </li>
-
-                    </ul>
+                <li class="list-group-item">
+                    {% include "productsentiment/includes/ListView.html" %}
+                </li>
+            </ul>
             </div>
           </div>
           <div class="col-md-6">

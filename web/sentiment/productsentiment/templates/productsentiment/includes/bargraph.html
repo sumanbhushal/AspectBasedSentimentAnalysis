@@ -2,9 +2,6 @@
 
 <canvas id="BarGraph"></canvas>
 
-<!--{% for post in aspect_bar_graph %}-->
-		<!--<h5>{{ post.id }} {{ post.product_aspect }} {{post.pos_score }}{{post.pos_sent_ids}}</h5>-->
-<!--{% endfor %}-->
 <script>
     var content = document.getElementById("BarGraph").getContext("2d");
 
@@ -31,7 +28,6 @@
       data: data,
       options: {
         barValueSpacing: 20,
-        onClick: clickEvent,
         scales: {
           yAxes: [{
             ticks: {
@@ -41,12 +37,6 @@
         }
     }
 });
-
-function clickEvent(event, array){
-    if(array[0]){
-        console.log(array[0])
-    }
-}
 
 </script>
 {% endblock %}
